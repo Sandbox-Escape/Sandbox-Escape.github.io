@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My GitHub Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Define the keyframes for the animated gradient */
+        @keyframes animated-gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* --- Custom Cursor --- */
+        html {
+            /* A nice, soft circular cursor */
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.1)" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'), auto;
+        }
+
+        a, button {
+            /* A different colored cursor for clickable items */
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="rgba(0, 255, 255, 0.2)" stroke="cyan" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'), pointer;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Apply the animated gradient background */
+            background: linear-gradient(45deg, #1f2937, #374151, #111827, #374151, #1f2937);
+            background-size: 400% 400%;
+            animation: animated-gradient 20s ease infinite;
+        }
+
+        /* Glassmorphism card effect */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+    </style>
+</head>
+<body class="text-white antialiased">
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- Header Section -->
+        <header class="text-center mb-12">
+            <img id="avatar" src="https://placehold.co/128x128/1a202c/ffffff?text=Org" alt="GitHub Avatar" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full mx-auto mb-4 border-4 border-gray-600 shadow-lg">
+            <h1 id="name" class="text-3xl sm:text-4xl font-bold text-gray-100">Organization Name</h1>
+            <p id="bio" class="text-md sm:text-lg text-gray-400 mt-2 max-w-2xl mx-auto">Organization description will appear here.</p>
+        </header>
+
+        <!-- Repositories Section -->
+        <main>
+            <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 text-gray-200">Our Repositories</h2>
+            <div id="repos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Repository cards will be injected here by JavaScript -->
+                <div class="text-center p-8 col-span-full">
+                    <p class="text-gray-400">Loading repositories...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer Section -->
+        <footer class="text-center mt-12 text-gray-500">
+            <p>Powered by the GitHub API</p>
+            <p>&copy; <span id="year"></span> <span id="footer-name">Organization Name</span>. All rights reserved.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // Set your GitHub Organization name here.
+        const GITHUB_ORG_NAME = 'Sandbox-Escape'; 
+
+        // --- DOM Elements ---
+        const avatarEl = document.getElementById('avatar');
+        const nameEl = document.getElementById('name');
+        const bioEl = document.getElementById('bio');
+        const reposContainerEl = document.getElementById('repos-container');
+        const yearEl = document.getElementById('year');
+        const footerNameEl = document.getElementById('footer-name');
+
+        // --- API URLs for Organizations ---
+        const ORG_API_URL = `https://api.github.com/orgs/${GITHUB_ORG_NAME}`;
+        const REPOS_API_URL = `https://api.github.com/orgs/${GITHUB_ORG_NAME}/repos?sort=updated&per_page=100`;
+
+        /**
+         * Fetches organization profile data from the GitHub API and updates the UI.
+         */
+        async function fetchOrgProfile() {
+            try {
+                const response = await fetch(ORG_API_URL);
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.statusText}`);
+                }
+                const org = await response.json();
+
+                avatarEl.src = org.avatar_url || 'https://placehold.co/128x128/1a202c/ffffff?text=Org';
+                avatarEl.onerror = () => { avatarEl.src = 'https://placehold.co/128x128/1a202c/ffffff?text=Org'; };
+                nameEl.textContent = org.name || org.login;
+                // Organizations use 'description' instead of 'bio'
+                bioEl.textContent = org.description || 'An awesome organization on GitHub.';
+                footerNameEl.textContent = org.name || org.login;
+
+            } catch (error) {
+                console.error('Error fetching organization profile:', error);
+                nameEl.textContent = 'Error';
+                bioEl.textContent = 'Could not fetch organization profile data.';
+            }
+        }
+
+        /**
+         * Fetches organization repositories and displays them as cards.
+         */
+        async function fetchOrgRepos() {
+            try {
+                const response = await fetch(REPOS_API_URL);
+                 if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.statusText}`);
+                }
+                const repos = await response.json();
+                
+                // Clear the loading message
+                reposContainerEl.innerHTML = '';
+
+                if (repos.length === 0) {
+                    reposContainerEl.innerHTML = '<p class="text-center col-span-full text-gray-400">No public repositories found.</p>';
+                    return;
+                }
+
+                repos.forEach(repo => {
+                    // Skip forked repositories to only show original work
+                    if (repo.fork) {
+                        return;
+                    }
+
+                    const repoCard = `
+                        <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="card rounded-lg p-6 flex flex-col justify-between shadow-lg hover:shadow-cyan-500/50">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-100 mb-2">${repo.name}</h3>
+                                <p class="text-gray-400 text-sm mb-4">${repo.description || 'No description provided.'}</p>
+                            </div>
+                            <div class="flex justify-between items-center mt-4 text-sm text-gray-300">
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                    ${repo.language || 'N/A'}
+                                </span>
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                    ${repo.stargazers_count}
+                                </span>
+                            </div>
+                        </a>
+                    `;
+                    reposContainerEl.innerHTML += repoCard;
+                });
+
+            } catch (error) {
+                console.error('Error fetching repositories:', error);
+                reposContainerEl.innerHTML = '<p class="text-center col-span-full text-red-400">Could not fetch repositories. Please check the organization name and your network connection.</p>';
+            }
+        }
+
+        /**
+         * Initializes the page.
+         */
+        function init() {
+            yearEl.textContent = new Date().getFullYear();
+            fetchOrgProfile();
+            fetchOrgRepos();
+        }
+
+        // --- Run Initialization ---
+        init();
+
+    </script>
+</body>
+</html>
