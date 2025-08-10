@@ -10,34 +10,25 @@
     <style>
         /* Define the keyframes for the animated gradient */
         @keyframes animated-gradient {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         /* --- Custom Cursor --- */
         html {
-            /* A nice, soft circular cursor */
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.1)" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'), auto;
         }
-
         a, button {
-            /* A different colored cursor for clickable items */
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="rgba(0, 255, 255, 0.2)" stroke="cyan" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'), pointer;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            /* Apply the animated gradient background */
             background: linear-gradient(45deg, #1f2937, #374151, #111827, #374151, #1f2937);
             background-size: 400% 400%;
             animation: animated-gradient 20s ease infinite;
+            padding-top: 5rem; /* Height of the navbar */
         }
 
         /* Glassmorphism card effect */
@@ -53,24 +44,15 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #111827;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #4b5563;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280;
-        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
         
-        /* Ensure content is not hidden behind fixed nav */
-        body {
-            padding-top: 5rem; /* Height of the navbar */
+        /* Gradient background for Join modal */
+        #join-modal-content {
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.8), rgba(17, 24, 39, 0.9));
         }
     </style>
 </head>
@@ -83,10 +65,10 @@
                 <div class="flex-shrink-0">
                      <span class="text-2xl font-bold text-white">Sandbox-Escape</span>
                 </div>
-                <div>
-                    <button id="credits-btn" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
-                        Credits
-                    </button>
+                <div class="flex items-center gap-4">
+                    <button id="my-se-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">My SE</button>
+                    <button id="credits-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">Credits</button>
+                    <button id="join-btn" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">Join</button>
                 </div>
             </div>
         </div>
@@ -94,84 +76,105 @@
 
     <!-- Main Container -->
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
-
-        <!-- Header Section -->
+        <!-- Header, Repos, and Footer sections remain the same -->
         <header class="text-center mb-12">
             <img id="avatar" src="https://placehold.co/128x128/1a202c/ffffff?text=Org" alt="GitHub Avatar" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full mx-auto mb-4 border-4 border-gray-600 shadow-lg">
             <h1 id="name" class="text-3xl sm:text-4xl font-bold text-gray-100">Organization Name</h1>
             <p id="bio" class="text-md sm:text-lg text-gray-400 mt-2 max-w-2xl mx-auto">Organization description will appear here.</p>
         </header>
 
-        <!-- Repositories Section -->
         <main>
             <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 text-gray-200">Our Repositories</h2>
             <div id="repos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Repository cards will be injected here by JavaScript -->
-                <div class="text-center p-8 col-span-full">
-                    <p class="text-gray-400">Loading repositories...</p>
-                </div>
+                <div class="text-center p-8 col-span-full"><p class="text-gray-400">Loading repositories...</p></div>
             </div>
         </main>
 
-        <!-- Footer Section -->
         <footer class="text-center mt-12 text-gray-500">
             <p>Powered by the GitHub API</p>
             <p>&copy; <span id="year"></span> <span id="footer-name">Organization Name</span>. All rights reserved.</p>
         </footer>
-
     </div>
     
-    <!-- Credits Modal -->
+    <!-- Modals -->
     <div id="credits-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="card w-full max-w-4xl max-h-[80vh] flex flex-col rounded-xl p-6 relative">
-            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+            <button class="close-modal-btn absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             <h2 class="text-2xl font-bold text-center mb-6 text-white flex-shrink-0">Credits</h2>
             <div id="members-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto p-2">
-                <!-- Member cards will be injected here -->
                 <p class="col-span-full text-center text-gray-400">Loading members...</p>
             </div>
         </div>
     </div>
 
+    <div id="join-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div id="join-modal-content" class="card w-full max-w-2xl h-[80vh] flex flex-col rounded-xl p-2 sm:p-4 relative">
+            <button class="close-modal-btn absolute top-4 right-4 text-gray-200 hover:text-white transition-colors z-10">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <iframe class="w-full h-full border-0 rounded-lg" src="https://docs.google.com/forms/d/e/1FAIpQLSdQaUx6Kh371zJ-pJD7gVMSqKSO9WYVspqPBe4OBsjK_CV5RA/viewform?embedded=true" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+        </div>
+    </div>
+
+    <div id="my-se-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="card w-full max-w-2xl max-h-[80vh] flex flex-col rounded-xl p-6 relative">
+             <button class="close-modal-btn absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-bold text-center mb-6 text-white flex-shrink-0">My Contributions</h2>
+            <form id="contribution-form" class="flex flex-col sm:flex-row gap-2 mb-4">
+                <input type="text" id="github-username-input" placeholder="Enter your GitHub username" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">Search</button>
+            </form>
+            <div id="contributions-container" class="overflow-y-auto p-2 space-y-3">
+                <p class="text-center text-gray-400">Enter your username to see your contributions.</p>
+            </div>
+        </div>
+    </div>
 
     <script>
         // --- CONFIGURATION ---
         const GITHUB_ORG_NAME = 'Sandbox-Escape'; 
 
         // --- DOM Elements ---
-        const avatarEl = document.getElementById('avatar');
         const nameEl = document.getElementById('name');
         const bioEl = document.getElementById('bio');
-        const reposContainerEl = document.getElementById('repos-container');
+        const avatarEl = document.getElementById('avatar');
         const yearEl = document.getElementById('year');
         const footerNameEl = document.getElementById('footer-name');
+        const reposContainerEl = document.getElementById('repos-container');
+        
         const creditsBtn = document.getElementById('credits-btn');
-        const closeModalBtn = document.getElementById('close-modal-btn');
+        const joinBtn = document.getElementById('join-btn');
+        const mySeBtn = document.getElementById('my-se-btn');
+        
         const creditsModal = document.getElementById('credits-modal');
+        const joinModal = document.getElementById('join-modal');
+        const mySeModal = document.getElementById('my-se-modal');
+        
         const membersContainer = document.getElementById('members-container');
+        const contributionForm = document.getElementById('contribution-form');
+        const contributionsContainer = document.getElementById('contributions-container');
+        const usernameInput = document.getElementById('github-username-input');
 
-        // --- API URLs for Organizations ---
+        // --- API URLs ---
         const ORG_API_URL = `https://api.github.com/orgs/${GITHUB_ORG_NAME}`;
         const REPOS_API_URL = `https://api.github.com/orgs/${GITHUB_ORG_NAME}/repos?sort=updated&per_page=100`;
         const MEMBERS_API_URL = `https://api.github.com/orgs/${GITHUB_ORG_NAME}/public_members`;
+        const userEventsUrl = (username) => `https://api.github.com/users/${username}/events/public`;
 
-        /**
-         * Fetches organization profile data from the GitHub API and updates the UI.
-         */
+        // --- Functions ---
         async function fetchOrgProfile() {
             try {
                 const response = await fetch(ORG_API_URL);
                 if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                 const org = await response.json();
-
                 avatarEl.src = org.avatar_url || 'https://placehold.co/128x128/1a202c/ffffff?text=Org';
-                avatarEl.onerror = () => { avatarEl.src = 'https://placehold.co/128x128/1a202c/ffffff?text=Org'; };
                 nameEl.textContent = org.name || org.login;
                 bioEl.textContent = org.description || 'An awesome organization on GitHub.';
                 footerNameEl.textContent = org.name || org.login;
-
             } catch (error) {
                 console.error('Error fetching organization profile:', error);
                 nameEl.textContent = 'Error';
@@ -179,25 +182,18 @@
             }
         }
 
-        /**
-         * Fetches organization repositories and displays them as cards.
-         */
         async function fetchOrgRepos() {
             try {
                 const response = await fetch(REPOS_API_URL);
-                 if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                 const repos = await response.json();
-                
                 reposContainerEl.innerHTML = '';
-
                 if (repos.length === 0) {
                     reposContainerEl.innerHTML = '<p class="text-center col-span-full text-gray-400">No public repositories found.</p>';
                     return;
                 }
-
                 repos.forEach(repo => {
                     if (repo.fork) return;
-
                     const repoCard = `
                         <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="card rounded-lg p-6 flex flex-col justify-between shadow-lg hover:shadow-cyan-500/50">
                             <div>
@@ -205,88 +201,120 @@
                                 <p class="text-gray-400 text-sm mb-4">${repo.description || 'No description provided.'}</p>
                             </div>
                             <div class="flex justify-between items-center mt-4 text-sm text-gray-300">
-                                <span class="flex items-center">
-                                    <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                    ${repo.language || 'N/A'}
-                                </span>
-                                <span class="flex items-center">
-                                    <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                                    ${repo.stargazers_count}
-                                </span>
+                                <span>${repo.language || 'N/A'}</span>
+                                <span>⭐ ${repo.stargazers_count}</span>
                             </div>
-                        </a>
-                    `;
+                        </a>`;
                     reposContainerEl.innerHTML += repoCard;
                 });
-
             } catch (error) {
                 console.error('Error fetching repositories:', error);
                 reposContainerEl.innerHTML = '<p class="text-center col-span-full text-red-400">Could not fetch repositories.</p>';
             }
         }
 
-        /**
-         * Fetches organization members from GitHub and displays them in the modal.
-         */
         async function fetchOrgMembers() {
+            membersContainer.innerHTML = '<p class="col-span-full text-center text-gray-400">Loading members...</p>';
             try {
                 const response = await fetch(MEMBERS_API_URL);
                 if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                 const members = await response.json();
-
-                membersContainer.innerHTML = ''; // Clear loading message
-
+                membersContainer.innerHTML = '';
                 if (members.length === 0) {
                     membersContainer.innerHTML = '<p class="col-span-full text-center text-gray-400">No public members found.</p>';
                     return;
                 }
-
                 members.forEach(member => {
                     const memberCard = `
                         <a href="${member.html_url}" target="_blank" rel="noopener noreferrer" class="bg-gray-800/50 p-4 rounded-lg text-center hover:bg-gray-700/70 transition-colors flex flex-col items-center gap-2">
                             <img src="${member.avatar_url}" alt="${member.login}" class="w-16 h-16 rounded-full border-2 border-gray-600">
                             <p class="font-bold text-md text-white">${member.login}</p>
-                        </a>
-                    `;
+                        </a>`;
                     membersContainer.innerHTML += memberCard;
                 });
-
             } catch (error) {
                 console.error('Error fetching organization members:', error);
                 membersContainer.innerHTML = '<p class="col-span-full text-center text-red-400">Could not fetch members.</p>';
             }
         }
-        
-        /**
-         * Initializes the page and event listeners.
-         */
+
+        async function fetchUserContributions(username) {
+            if (!username) {
+                contributionsContainer.innerHTML = '<p class="text-center text-yellow-400">Please enter a username.</p>';
+                return;
+            }
+            contributionsContainer.innerHTML = '<p class="text-center text-gray-400">Searching for contributions...</p>';
+            try {
+                const response = await fetch(userEventsUrl(username));
+                if (!response.ok) throw new Error(`Could not find user or fetch events: ${response.statusText}`);
+                const events = await response.json();
+
+                const orgEvents = events.filter(event => event.repo.name.startsWith(`${GITHUB_ORG_NAME}/`));
+                
+                if (orgEvents.length === 0) {
+                    contributionsContainer.innerHTML = `<p class="text-center text-gray-400">No public contributions found for ${username} in this organization.</p>`;
+                    return;
+                }
+                
+                contributionsContainer.innerHTML = ''; // Clear previous results
+                orgEvents.forEach(event => {
+                    let eventHtml = '';
+                    const repoName = event.repo.name.split('/')[1];
+                    const eventDate = new Date(event.created_at).toLocaleDateString();
+
+                    if (event.type === 'PushEvent') {
+                        eventHtml = `<div class="bg-gray-800/50 p-3 rounded-lg">Pushed ${event.payload.size} commit(s) to <a href="https://github.com/${event.repo.name}" target="_blank" class="font-bold text-cyan-400">${repoName}</a> on ${eventDate}</div>`;
+                    } else if (event.type === 'PullRequestEvent') {
+                        eventHtml = `<div class="bg-gray-800/50 p-3 rounded-lg">${event.payload.action.charAt(0).toUpperCase() + event.payload.action.slice(1)} a pull request in <a href="${event.payload.pull_request.html_url}" target="_blank" class="font-bold text-cyan-400">${repoName}</a> on ${eventDate}</div>`;
+                    } else if (event.type === 'IssuesEvent') {
+                        eventHtml = `<div class="bg-gray-800/50 p-3 rounded-lg">${event.payload.action.charAt(0).toUpperCase() + event.payload.action.slice(1)} an issue in <a href="${event.payload.issue.html_url}" target="_blank" class="font-bold text-cyan-400">${repoName}</a> on ${eventDate}</div>`;
+                    }
+                    contributionsContainer.innerHTML += eventHtml;
+                });
+
+            } catch (error) {
+                console.error('Error fetching user contributions:', error);
+                contributionsContainer.innerHTML = `<p class="text-center text-red-400">Could not fetch contributions for ${username}.</p>`;
+            }
+        }
+
+        // --- Initialization and Event Listeners ---
         function init() {
             yearEl.textContent = new Date().getFullYear();
             fetchOrgProfile();
             fetchOrgRepos();
 
-            // Event listeners for the modal
+            // Modal toggling logic
+            const setupModal = (btn, modal) => {
+                btn.addEventListener('click', () => modal.classList.remove('hidden'));
+                modal.querySelector('.close-modal-btn').addEventListener('click', () => modal.classList.add('hidden'));
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) modal.classList.add('hidden');
+                });
+            };
+            
+            setupModal(joinBtn, joinModal);
+            setupModal(mySeBtn, mySeModal);
+            
             creditsBtn.addEventListener('click', () => {
                 creditsModal.classList.remove('hidden');
-                // Fetch members only when the modal is opened and if it hasn't been populated yet.
                 if (membersContainer.childElementCount <= 1) { 
                      fetchOrgMembers();
                 }
             });
-            closeModalBtn.addEventListener('click', () => {
-                creditsModal.classList.add('hidden');
-            });
-            // Also close modal if clicking on the background overlay
+            creditsModal.querySelector('.close-modal-btn').addEventListener('click', () => creditsModal.classList.add('hidden'));
             creditsModal.addEventListener('click', (event) => {
-                if (event.target === creditsModal) {
-                    creditsModal.classList.add('hidden');
-                }
+                if (event.target === creditsModal) creditsModal.classList.add('hidden');
+            });
+
+            // Contribution form submission
+            contributionForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                fetchUserContributions(usernameInput.value.trim());
             });
         }
 
-        // --- Run Initialization ---
         init();
-
     </script>
 </body>
 </html>
