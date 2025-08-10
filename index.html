@@ -66,9 +66,30 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #6b7280;
         }
+        
+        /* Ensure content is not hidden behind fixed nav */
+        body {
+            padding-top: 5rem; /* Height of the navbar */
+        }
     </style>
 </head>
 <body class="text-white antialiased">
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/30 backdrop-blur-lg border-b border-gray-700/50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0">
+                     <span class="text-2xl font-bold text-white">Sandbox-Escape</span>
+                </div>
+                <div>
+                    <button id="credits-btn" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
+                        Credits
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
     <!-- Main Container -->
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -98,10 +119,24 @@
         </footer>
 
     </div>
+    
+    <!-- Credits Modal -->
+    <div id="credits-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="card w-full max-w-4xl max-h-[80vh] flex flex-col rounded-xl p-6 relative">
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-bold text-center mb-6 text-white flex-shrink-0">Credits</h2>
+            <div id="members-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto p-2">
+                <!-- Member cards will be injected here -->
+                <p class="col-span-full text-center text-gray-400">Loading members...</p>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         // --- CONFIGURATION ---
-        // Set your GitHub Organization name here.
         const GITHUB_ORG_NAME = 'Sandbox-Escape'; 
 
         // --- DOM Elements ---
@@ -111,10 +146,15 @@
         const reposContainerEl = document.getElementById('repos-container');
         const yearEl = document.getElementById('year');
         const footerNameEl = document.getElementById('footer-name');
+        const creditsBtn = document.getElementById('credits-btn');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const creditsModal = document.getElementById('credits-modal');
+        const membersContainer = document.getElementById('members-container');
 
         // --- API URLs for Organizations ---
         const ORG_API_URL = `https://api.github.com/orgs/${GITHUB_ORG_NAME}`;
         const REPOS_API_URL = `https://api.github.com/orgs/${GITHUB_ORG_NAME}/repos?sort=updated&per_page=100`;
+        const MEMBERS_API_URL = `https://api.github.com/orgs/${GITHUB_ORG_NAME}/public_members`;
 
         /**
          * Fetches organization profile data from the GitHub API and updates the UI.
@@ -122,15 +162,12 @@
         async function fetchOrgProfile() {
             try {
                 const response = await fetch(ORG_API_URL);
-                if (!response.ok) {
-                    throw new Error(`Network response was not ok: ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                 const org = await response.json();
 
                 avatarEl.src = org.avatar_url || 'https://placehold.co/128x128/1a202c/ffffff?text=Org';
                 avatarEl.onerror = () => { avatarEl.src = 'https://placehold.co/128x128/1a202c/ffffff?text=Org'; };
                 nameEl.textContent = org.name || org.login;
-                // Organizations use 'description' instead of 'bio'
                 bioEl.textContent = org.description || 'An awesome organization on GitHub.';
                 footerNameEl.textContent = org.name || org.login;
 
@@ -147,12 +184,9 @@
         async function fetchOrgRepos() {
             try {
                 const response = await fetch(REPOS_API_URL);
-                 if (!response.ok) {
-                    throw new Error(`Network response was not ok: ${response.statusText}`);
-                }
+                 if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                 const repos = await response.json();
                 
-                // Clear the loading message
                 reposContainerEl.innerHTML = '';
 
                 if (repos.length === 0) {
@@ -161,10 +195,7 @@
                 }
 
                 repos.forEach(repo => {
-                    // Skip forked repositories to only show original work
-                    if (repo.fork) {
-                        return;
-                    }
+                    if (repo.fork) return;
 
                     const repoCard = `
                         <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="card rounded-lg p-6 flex flex-col justify-between shadow-lg hover:shadow-cyan-500/50">
@@ -189,17 +220,67 @@
 
             } catch (error) {
                 console.error('Error fetching repositories:', error);
-                reposContainerEl.innerHTML = '<p class="text-center col-span-full text-red-400">Could not fetch repositories. Please check the organization name and your network connection.</p>';
+                reposContainerEl.innerHTML = '<p class="text-center col-span-full text-red-400">Could not fetch repositories.</p>';
             }
         }
 
         /**
-         * Initializes the page.
+         * Fetches organization members from GitHub and displays them in the modal.
+         */
+        async function fetchOrgMembers() {
+            try {
+                const response = await fetch(MEMBERS_API_URL);
+                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                const members = await response.json();
+
+                membersContainer.innerHTML = ''; // Clear loading message
+
+                if (members.length === 0) {
+                    membersContainer.innerHTML = '<p class="col-span-full text-center text-gray-400">No public members found.</p>';
+                    return;
+                }
+
+                members.forEach(member => {
+                    const memberCard = `
+                        <a href="${member.html_url}" target="_blank" rel="noopener noreferrer" class="bg-gray-800/50 p-4 rounded-lg text-center hover:bg-gray-700/70 transition-colors flex flex-col items-center gap-2">
+                            <img src="${member.avatar_url}" alt="${member.login}" class="w-16 h-16 rounded-full border-2 border-gray-600">
+                            <p class="font-bold text-md text-white">${member.login}</p>
+                        </a>
+                    `;
+                    membersContainer.innerHTML += memberCard;
+                });
+
+            } catch (error) {
+                console.error('Error fetching organization members:', error);
+                membersContainer.innerHTML = '<p class="col-span-full text-center text-red-400">Could not fetch members.</p>';
+            }
+        }
+        
+        /**
+         * Initializes the page and event listeners.
          */
         function init() {
             yearEl.textContent = new Date().getFullYear();
             fetchOrgProfile();
             fetchOrgRepos();
+
+            // Event listeners for the modal
+            creditsBtn.addEventListener('click', () => {
+                creditsModal.classList.remove('hidden');
+                // Fetch members only when the modal is opened and if it hasn't been populated yet.
+                if (membersContainer.childElementCount <= 1) { 
+                     fetchOrgMembers();
+                }
+            });
+            closeModalBtn.addEventListener('click', () => {
+                creditsModal.classList.add('hidden');
+            });
+            // Also close modal if clicking on the background overlay
+            creditsModal.addEventListener('click', (event) => {
+                if (event.target === creditsModal) {
+                    creditsModal.classList.add('hidden');
+                }
+            });
         }
 
         // --- Run Initialization ---
@@ -208,3 +289,4 @@
     </script>
 </body>
 </html>
+
