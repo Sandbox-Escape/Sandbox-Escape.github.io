@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P2P Voice Call</title>
+    <title>P2P Video & Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -11,32 +11,6 @@
             font-family: 'Inter', sans-serif;
         }
         @import url('https://rsms.me/inter/inter.css');
-        .status-dot {
-            height: 12px;
-            width: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse 2s infinite;
-        }
-        .status-dot.offline {
-            background-color: #f87171; /* red-400 */
-        }
-        .status-dot.connecting {
-            background-color: #facc15; /* yellow-400 */
-            animation: pulse 1s infinite;
-        }
-        .status-dot.online {
-            background-color: #4ade80; /* green-400 */
-            animation: none;
-        }
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
         #notification {
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
             transform: translateY(-20px);
@@ -45,183 +19,201 @@
             opacity: 1;
             transform: translateY(0);
         }
+        #chat-container {
+            transition: transform 0.3s ease-in-out;
+        }
+        #chat-container.closed {
+            transform: translateX(100%);
+        }
+        #local-video {
+            transition: all 0.3s ease-in-out;
+        }
+        .message {
+            max-width: 80%;
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-900 text-white overflow-hidden">
 
-    <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-2xl shadow-lg relative">
-        <!-- Notification Area -->
-        <div id="notification" class="absolute top-0 left-1/2 -translate-x-1/2 mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold opacity-0 pointer-events-none"></div>
-
-        <div class="text-center">
-            <h1 class="text-3xl font-bold text-white">P2P Voice Chat</h1>
-            <p class="text-gray-400 mt-2">Connect directly with a friend using your voice.</p>
-        </div>
-
-        <!-- Status Indicator -->
-        <div class="flex items-center justify-center space-x-2 pt-4">
-            <span id="status-dot" class="status-dot offline"></span>
-            <p id="status-text" class="text-gray-400">Status: Offline</p>
-        </div>
-
-        <!-- Your ID -->
-        <div class="space-y-2">
-            <label for="my-id" class="block text-sm font-medium text-gray-300">Your ID</label>
-            <div class="flex items-center space-x-2">
-                <input type="text" id="my-id" readonly class="w-full px-4 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Initializing...">
-                <button id="copy-id-btn" class="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-colors duration-200" title="Copy your ID">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2H6zm8 2V5a1 1 0 00-1-1H7a1 1 0 00-1 1v.083l.083.083L7.5 6.583A2 2 0 019 8h2a2 2 0 011.414 3.414l.586.586V5z" />
-                    </svg>
-                </button>
+    <!-- Lobby View -->
+    <div id="lobby" class="flex items-center justify-center min-h-screen p-4">
+        <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-2xl shadow-lg relative">
+            <div id="notification" class="absolute top-0 left-1/2 -translate-x-1/2 mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold opacity-0 pointer-events-none"></div>
+            <div class="text-center">
+                <h1 class="text-3xl font-bold text-white">P2P Video & Chat</h1>
+                <p class="text-gray-400 mt-2">Connect directly with a friend.</p>
             </div>
-            <p class="text-xs text-gray-500">Share this ID with your friend to start a call.</p>
-        </div>
-
-        <!-- Friend's ID -->
-        <div class="space-y-2">
-            <label for="friend-id" class="block text-sm font-medium text-gray-300">Friend's ID</label>
-            <input type="text" id="friend-id" class="w-full px-4 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Enter friend's ID here">
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 pt-4">
-            <button id="call-btn" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg text-white font-bold transition-colors duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
+            <div class="flex items-center justify-center space-x-2 pt-4">
+                <span id="status-dot" class="h-3 w-3 rounded-full bg-red-400"></span>
+                <p id="status-text" class="text-gray-400">Status: Offline</p>
+            </div>
+            <div class="space-y-2">
+                <label for="my-id" class="block text-sm font-medium text-gray-300">Your ID</label>
+                <div class="flex items-center space-x-2">
+                    <input type="text" id="my-id" readonly class="w-full px-4 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Initializing...">
+                    <button id="copy-id-btn" class="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-colors" title="Copy your ID">
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label for="friend-id" class="block text-sm font-medium text-gray-300">Friend's ID</label>
+                <input type="text" id="friend-id" class="w-full px-4 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-lg" placeholder="Enter friend's ID here">
+            </div>
+            <button id="call-btn" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-bold transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 <span>Call</span>
             </button>
-            <button id="end-call-btn" class="w-full px-4 py-3 bg-red-600 hover:bg-red-700 rounded-lg text-white font-bold transition-colors duration-200 flex items-center justify-center space-x-2" style="display: none;">
-                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 8l2-2m0 0l2 2m-2-2v12a2 2 0 01-2 2H8a2 2 0 01-2-2V6l2-2m0 0l2 2m-2-2h8z" />
-                </svg>
-                <span>End Call</span>
-            </button>
         </div>
-        
-        <!-- Hidden audio elements -->
-        <audio id="localAudio" muted></audio>
-        <audio id="remoteAudio" autoplay></audio>
+    </div>
 
+    <!-- In-Call View -->
+    <div id="in-call" class="hidden h-screen w-screen relative">
+        <video id="remote-video" class="w-full h-full object-cover bg-black" autoplay></video>
+        <video id="local-video" class="absolute w-48 h-36 bottom-4 right-4 rounded-lg shadow-lg bg-black object-cover border-2 border-gray-700" autoplay muted></video>
+        
+        <!-- Control Bar -->
+        <div class="absolute bottom-0 left-0 right-0 flex justify-center items-center p-4 bg-black bg-opacity-25">
+            <div class="flex space-x-4 bg-gray-800 p-3 rounded-full shadow-lg">
+                <button id="toggle-mic-btn" class="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-500 transition-colors">
+                    <svg id="mic-on-icon" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                    <svg id="mic-off-icon" class="w-6 h-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.586 15.586a2 2 0 01-2.828 0L6 8.414m12 0l-2.828 2.828m0 0a2 2 0 01-2.828 0L6 8.414m0-2.828l2.828-2.828m0 0a2 2 0 012.828 0l8.586 8.586"></path></svg>
+                </button>
+                <button id="toggle-cam-btn" class="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-500 transition-colors">
+                     <svg id="cam-on-icon" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                     <svg id="cam-off-icon" class="w-6 h-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c1.473 0 2.882.264 4.195.742m4.553 2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894l-4.553-2.276M2.458 12l3.442 4.257A8.95 8.95 0 0012 19c4.477 0 8.268-2.943 9.542-7"></path></svg>
+                </button>
+                 <button id="toggle-chat-btn" class="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-500 transition-colors">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                </button>
+                <button id="end-call-btn" class="w-20 h-12 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-500 transition-colors">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8l2-2m0 0l2 2m-2-2v12a2 2 0 01-2 2H8a2 2 0 01-2-2V6l2-2m0 0l2 2m-2-2h8z" transform="rotate(180 12 12)"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Panel -->
+        <div id="chat-container" class="closed absolute top-0 right-0 h-full w-full max-w-sm bg-gray-800 bg-opacity-90 backdrop-blur-sm flex flex-col p-4">
+            <h2 class="text-xl font-bold mb-4">Chat</h2>
+            <div id="messages" class="flex-1 overflow-y-auto space-y-4 pr-2">
+                <!-- Messages will be appended here -->
+            </div>
+            <form id="chat-form" class="mt-4 flex space-x-2">
+                <input id="chat-input" type="text" class="flex-1 px-4 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-lg" placeholder="Type a message...">
+                <button type="submit" class="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                </button>
+            </form>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // UI Elements
+            const lobbyEl = document.getElementById('lobby');
+            const inCallEl = document.getElementById('in-call');
             const myIdEl = document.getElementById('my-id');
             const copyIdBtn = document.getElementById('copy-id-btn');
             const friendIdEl = document.getElementById('friend-id');
             const callBtn = document.getElementById('call-btn');
             const endCallBtn = document.getElementById('end-call-btn');
-            const localAudio = document.getElementById('localAudio');
-            const remoteAudio = document.getElementById('remoteAudio');
+            const localVideo = document.getElementById('local-video');
+            const remoteVideo = document.getElementById('remote-video');
             const statusDot = document.getElementById('status-dot');
             const statusText = document.getElementById('status-text');
             const notificationEl = document.getElementById('notification');
+            const toggleMicBtn = document.getElementById('toggle-mic-btn');
+            const toggleCamBtn = document.getElementById('toggle-cam-btn');
+            const toggleChatBtn = document.getElementById('toggle-chat-btn');
+            const chatContainer = document.getElementById('chat-container');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const messagesContainer = document.getElementById('messages');
 
+            // State
             let localStream;
             let currentCall;
+            let dataConnection;
             let notificationTimeout;
             
             const peer = new Peer({
-                config: {
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                    ],
-                    sdpSemantics: 'unified-plan'
-                },
+                config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }], sdpSemantics: 'unified-plan' },
                 pingInterval: 3000
             });
 
             // --- PeerJS Event Listeners ---
-
             peer.on('open', (id) => {
                 console.log('My peer ID is: ' + id);
                 myIdEl.value = id;
-                updateStatus('online', 'Status: Online, ready to call.');
+                updateStatus('online', 'Status: Online');
                 callBtn.disabled = false;
             });
 
-            peer.on('call', (call) => {
-                console.log('Incoming call...');
-                // Automatically answer incoming calls
-                navigator.mediaDevices.getUserMedia({ video: false, audio: true })
-                    .then(stream => {
-                        localStream = stream;
-                        localAudio.srcObject = stream;
-                        
-                        call.answer(stream);
-                        
-                        call.on('stream', (remoteStream) => {
-                            console.log('Received remote stream.');
-                            remoteAudio.srcObject = remoteStream;
-                        });
-
-                        currentCall = call;
-                        updateUiForCall();
-                        updateStatus('online', `Status: In call with ${call.peer}`);
-                        currentCall.on('close', endCall);
-
-                    }).catch(err => {
-                        console.error('Failed to get local stream', err);
-                        showNotification('Could not access microphone.', true);
-                    });
+            // Handle incoming data connection (for chat)
+            peer.on('connection', (conn) => {
+                console.log('Incoming data connection.');
+                dataConnection = conn;
+                setupDataConnectionListeners();
             });
 
+            // Handle incoming media call
+            peer.on('call', (call) => {
+                console.log('Incoming call...');
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                    .then(stream => {
+                        localStream = stream;
+                        localVideo.srcObject = stream;
+                        call.answer(stream);
+                        setupCallListeners(call);
+                        switchToInCallView();
+                    }).catch(err => console.error('Failed to get local stream', err));
+            });
+            
             peer.on('error', (err) => {
                 console.error('PeerJS error:', err);
-                showNotification(`Error: ${err.message}. Please refresh.`, true);
-                updateStatus('offline', `Status: Error - ${err.type}`);
+                showNotification(`Error: ${err.message}`, true);
+                updateStatus('offline', `Status: Error`);
                 callBtn.disabled = true;
             });
             
             peer.on('disconnected', () => {
                 console.log('Peer disconnected from server.');
-                updateStatus('connecting', 'Status: Connection lost. Reconnecting...');
+                updateStatus('connecting', 'Status: Reconnecting...');
                 callBtn.disabled = true;
-                // PeerJS will automatically try to reconnect.
-                // We add a manual check on visibility change as a fallback.
             });
 
             // --- UI Event Listeners ---
-
             callBtn.addEventListener('click', () => {
                 const friendId = friendIdEl.value.trim();
                 if (!friendId) {
                     showNotification("Please enter a friend's ID.", true);
                     return;
                 }
-
-                console.log(`Calling ${friendId}...`);
-                updateStatus('connecting', `Status: Calling ${friendId}...`);
-
-                navigator.mediaDevices.getUserMedia({ video: false, audio: true })
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
                     .then(stream => {
                         localStream = stream;
-                        localAudio.srcObject = stream;
-
-                        const call = peer.call(friendId, stream);
+                        localVideo.srcObject = stream;
                         
-                        call.on('stream', (remoteStream) => {
-                            remoteAudio.srcObject = remoteStream;
-                        });
+                        const call = peer.call(friendId, stream);
+                        setupCallListeners(call);
 
-                        currentCall = call;
-                        updateUiForCall();
-                        updateStatus('online', `Status: In call with ${friendId}`);
-                        currentCall.on('close', endCall);
+                        dataConnection = peer.connect(friendId);
+                        setupDataConnectionListeners();
 
-                    }).catch(err => {
-                        console.error('Failed to get local stream', err);
-                        showNotification('Could not access microphone.', true);
-                        updateStatus('online', 'Status: Online, ready to call.');
-                    });
+                        switchToInCallView();
+                    }).catch(err => console.error('Failed to get local stream', err));
             });
-            
-            endCallBtn.addEventListener('click', () => {
-                endCall();
+
+            endCallBtn.addEventListener('click', () => endCall());
+            toggleMicBtn.addEventListener('click', toggleMic);
+            toggleCamBtn.addEventListener('click', toggleCam);
+            toggleChatBtn.addEventListener('click', () => chatContainer.classList.toggle('closed'));
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const message = chatInput.value;
+                if (message.trim() === '') return;
+                dataConnection.send(message);
+                appendMessage(message, 'sent');
+                chatInput.value = '';
             });
 
             copyIdBtn.addEventListener('click', () => {
@@ -231,74 +223,95 @@
                 showNotification("Copied ID!");
             });
             
-            // --- Visibility API for Robust Reconnection ---
-            // This is crucial for mobile browsers and Safari, which can pause
-            // background tabs and cause the connection to drop.
             document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') {
-                    // When the tab becomes visible again, check the connection.
-                    if (peer && peer.disconnected) {
-                        console.log('Tab is visible again, forcing reconnect...');
-                        updateStatus('connecting', 'Status: Reconnecting...');
-                        peer.reconnect();
-                    }
+                if (document.visibilityState === 'visible' && peer && peer.disconnected) {
+                    console.log('Reconnecting on visibility change...');
+                    peer.reconnect();
                 }
             });
 
             // --- Helper Functions ---
-
-            function updateUiForCall() {
-                callBtn.style.display = 'none';
-                endCallBtn.style.display = 'flex';
-                friendIdEl.disabled = true;
+            function setupCallListeners(call) {
+                currentCall = call;
+                call.on('stream', (remoteStream) => {
+                    remoteVideo.srcObject = remoteStream;
+                });
+                call.on('close', endCall);
+                call.on('error', (err) => console.error('Call error:', err));
             }
-            
-            function resetUi() {
-                callBtn.style.display = 'flex';
-                endCallBtn.style.display = 'none';
-                friendIdEl.disabled = false;
-                friendIdEl.value = '';
+
+            function setupDataConnectionListeners() {
+                dataConnection.on('data', (data) => {
+                    appendMessage(data, 'received');
+                });
+                dataConnection.on('open', () => console.log('Data connection opened.'));
+                dataConnection.on('close', () => console.log('Data connection closed.'));
+            }
+
+            function appendMessage(message, type) {
+                const messageEl = document.createElement('div');
+                messageEl.textContent = message;
+                messageEl.classList.add('message', 'p-2', 'rounded-lg', 'w-fit');
+                if (type === 'sent') {
+                    messageEl.classList.add('bg-blue-600', 'self-end', 'ml-auto');
+                } else {
+                    messageEl.classList.add('bg-gray-600', 'self-start', 'mr-auto');
+                }
+                messagesContainer.appendChild(messageEl);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            function toggleMic() {
+                const audioTrack = localStream.getAudioTracks()[0];
+                audioTrack.enabled = !audioTrack.enabled;
+                document.getElementById('mic-on-icon').classList.toggle('hidden', !audioTrack.enabled);
+                document.getElementById('mic-off-icon').classList.toggle('hidden', audioTrack.enabled);
+            }
+
+            function toggleCam() {
+                const videoTrack = localStream.getVideoTracks()[0];
+                videoTrack.enabled = !videoTrack.enabled;
+                document.getElementById('cam-on-icon').classList.toggle('hidden', !videoTrack.enabled);
+                document.getElementById('cam-off-icon').classList.toggle('hidden', videoTrack.enabled);
+                localVideo.classList.toggle('hidden', !videoTrack.enabled);
             }
 
             function endCall() {
-                console.log('Call ended.');
-                if (currentCall) {
-                    currentCall.close();
-                    currentCall = null;
-                }
-                if (localStream) {
-                    localStream.getTracks().forEach(track => track.stop());
-                    localStream = null;
-                }
-                remoteAudio.srcObject = null;
-                resetUi();
-                // Only reset to 'online' if the peer connection is still open
-                if (peer && !peer.disconnected) {
-                    updateStatus('online', 'Status: Online, ready to call.');
-                } else {
-                    updateStatus('connecting', 'Status: Connection lost. Reconnecting...');
-                }
+                if (currentCall) currentCall.close();
+                if (dataConnection) dataConnection.close();
+                if (localStream) localStream.getTracks().forEach(track => track.stop());
+                switchToLobbyView();
+            }
+
+            function switchToInCallView() {
+                lobbyEl.classList.add('hidden');
+                inCallEl.classList.remove('hidden');
+            }
+
+            function switchToLobbyView() {
+                lobbyEl.classList.remove('hidden');
+                inCallEl.classList.add('hidden');
+                remoteVideo.srcObject = null;
+                localVideo.srcObject = null;
+                messagesContainer.innerHTML = '';
             }
             
             function updateStatus(state, text) {
-                statusDot.className = `status-dot ${state}`;
+                statusDot.className = `h-3 w-3 rounded-full bg-${state === 'online' ? 'green' : state === 'connecting' ? 'yellow' : 'red'}-400`;
+                if(state === 'connecting') statusDot.classList.add('animate-pulse');
                 statusText.textContent = text;
             }
 
             function showNotification(message, isError = false) {
                 if (notificationTimeout) clearTimeout(notificationTimeout);
-
                 notificationEl.textContent = message;
-                notificationEl.className = `absolute top-0 left-1/2 -translate-x-1/2 mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold pointer-events-auto ${isError ? 'bg-red-500' : 'bg-blue-500'} show`;
-
+                notificationEl.className = `absolute top-0 left-1/2 -translate-x-1/2 mt-4 px-4 py-2 rounded-lg text-white font-semibold pointer-events-auto ${isError ? 'bg-red-500' : 'bg-blue-500'} show`;
                 notificationTimeout = setTimeout(() => {
                     notificationEl.classList.remove('show');
-                    notificationEl.classList.add('pointer-events-none');
                 }, 3000);
             }
             
-            // Initializing status and disabling call button until connected
-            updateStatus('connecting', 'Status: Connecting to server...');
+            updateStatus('connecting', 'Status: Connecting...');
             callBtn.disabled = true;
         });
     </script>
