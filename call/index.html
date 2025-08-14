@@ -38,11 +38,16 @@
             }
         }
         #notification {
-            transition: opacity 0.5s ease-in-out;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transform: translateY(-20px);
+        }
+        #notification.show {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
 
     <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-2xl shadow-lg relative">
         <!-- Notification Area -->
@@ -64,7 +69,7 @@
             <label for="my-id" class="block text-sm font-medium text-gray-300">Your ID</label>
             <div class="flex items-center space-x-2">
                 <input type="text" id="my-id" readonly class="w-full px-4 py-2 text-gray-200 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Initializing...">
-                <button id="copy-id-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-colors duration-200" title="Copy your ID">
+                <button id="copy-id-btn" class="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-colors duration-200" title="Copy your ID">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                         <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2H6zm8 2V5a1 1 0 00-1-1H7a1 1 0 00-1 1v.083l.083.083L7.5 6.583A2 2 0 019 8h2a2 2 0 011.414 3.414l.586.586V5z" />
@@ -82,7 +87,7 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 pt-4">
-            <button id="call-btn" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg text-white font-bold transition-colors duration-200 flex items-center justify-center space-x-2">
+            <button id="call-btn" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg text-white font-bold transition-colors duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
@@ -119,11 +124,6 @@
             let currentCall;
             let notificationTimeout;
             
-            // This configuration is updated for better Safari compatibility.
-            // 1. `pingInterval`: Sends a heartbeat to the server more frequently 
-            //    to prevent Safari from closing the connection due to inactivity.
-            // 2. `sdpSemantics`: A standard setting for modern WebRTC that can improve
-            //    cross-browser compatibility.
             const peer = new Peer({
                 config: {
                     iceServers: [
@@ -132,7 +132,7 @@
                     ],
                     sdpSemantics: 'unified-plan'
                 },
-                pingInterval: 3000 // Pings every 3 seconds
+                pingInterval: 3000
             });
 
             // --- PeerJS Event Listeners ---
@@ -141,10 +141,12 @@
                 console.log('My peer ID is: ' + id);
                 myIdEl.value = id;
                 updateStatus('online', 'Status: Online, ready to call.');
+                callBtn.disabled = false;
             });
 
             peer.on('call', (call) => {
                 console.log('Incoming call...');
+                // Automatically answer incoming calls
                 navigator.mediaDevices.getUserMedia({ video: false, audio: true })
                     .then(stream => {
                         localStream = stream;
@@ -164,7 +166,7 @@
 
                     }).catch(err => {
                         console.error('Failed to get local stream', err);
-                        showNotification('Could not access microphone. Please check permissions.', true);
+                        showNotification('Could not access microphone.', true);
                     });
             });
 
@@ -172,13 +174,15 @@
                 console.error('PeerJS error:', err);
                 showNotification(`Error: ${err.message}. Please refresh.`, true);
                 updateStatus('offline', `Status: Error - ${err.type}`);
+                callBtn.disabled = true;
             });
             
             peer.on('disconnected', () => {
-                console.log('Peer disconnected from server. Attempting to reconnect...');
-                updateStatus('connecting', 'Status: Reconnecting...');
-                // This will automatically try to reconnect with the same ID.
-                peer.reconnect();
+                console.log('Peer disconnected from server.');
+                updateStatus('connecting', 'Status: Connection lost. Reconnecting...');
+                callBtn.disabled = true;
+                // PeerJS will automatically try to reconnect.
+                // We add a manual check on visibility change as a fallback.
             });
 
             // --- UI Event Listeners ---
@@ -201,7 +205,6 @@
                         const call = peer.call(friendId, stream);
                         
                         call.on('stream', (remoteStream) => {
-                            console.log('Received remote stream from outgoing call.');
                             remoteAudio.srcObject = remoteStream;
                         });
 
@@ -212,7 +215,7 @@
 
                     }).catch(err => {
                         console.error('Failed to get local stream', err);
-                        showNotification('Could not access microphone. Please check permissions.', true);
+                        showNotification('Could not access microphone.', true);
                         updateStatus('online', 'Status: Online, ready to call.');
                     });
             });
@@ -222,11 +225,24 @@
             });
 
             copyIdBtn.addEventListener('click', () => {
+                if (!myIdEl.value) return;
                 myIdEl.select();
-                // A more modern approach might use navigator.clipboard, but execCommand has broader support
-                // and is fine for this internal tool.
                 document.execCommand('copy');
                 showNotification("Copied ID!");
+            });
+            
+            // --- Visibility API for Robust Reconnection ---
+            // This is crucial for mobile browsers and Safari, which can pause
+            // background tabs and cause the connection to drop.
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    // When the tab becomes visible again, check the connection.
+                    if (peer && peer.disconnected) {
+                        console.log('Tab is visible again, forcing reconnect...');
+                        updateStatus('connecting', 'Status: Reconnecting...');
+                        peer.reconnect();
+                    }
+                }
             });
 
             // --- Helper Functions ---
@@ -256,7 +272,12 @@
                 }
                 remoteAudio.srcObject = null;
                 resetUi();
-                updateStatus('online', 'Status: Online, ready to call.');
+                // Only reset to 'online' if the peer connection is still open
+                if (peer && !peer.disconnected) {
+                    updateStatus('online', 'Status: Online, ready to call.');
+                } else {
+                    updateStatus('connecting', 'Status: Connection lost. Reconnecting...');
+                }
             }
             
             function updateStatus(state, text) {
@@ -265,22 +286,20 @@
             }
 
             function showNotification(message, isError = false) {
-                // Clear any existing timeout
-                if (notificationTimeout) {
-                    clearTimeout(notificationTimeout);
-                }
+                if (notificationTimeout) clearTimeout(notificationTimeout);
 
                 notificationEl.textContent = message;
-                notificationEl.className = `absolute top-0 left-1/2 -translate-x-1/2 mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold opacity-100 pointer-events-auto ${isError ? 'bg-red-500' : 'bg-blue-500'}`;
+                notificationEl.className = `absolute top-0 left-1/2 -translate-x-1/2 mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold pointer-events-auto ${isError ? 'bg-red-500' : 'bg-blue-500'} show`;
 
-                // Hide the notification after 3 seconds
                 notificationTimeout = setTimeout(() => {
-                    notificationEl.style.opacity = '0';
+                    notificationEl.classList.remove('show');
                     notificationEl.classList.add('pointer-events-none');
                 }, 3000);
             }
             
+            // Initializing status and disabling call button until connected
             updateStatus('connecting', 'Status: Connecting to server...');
+            callBtn.disabled = true;
         });
     </script>
 </body>
