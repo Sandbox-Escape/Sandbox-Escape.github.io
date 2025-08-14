@@ -37,11 +37,17 @@
                 opacity: 0.5;
             }
         }
+        #notification {
+            transition: opacity 0.5s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
 
-    <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-2xl shadow-lg">
+    <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-2xl shadow-lg relative">
+        <!-- Notification Area -->
+        <div id="notification" class="absolute top-0 left-1/2 -translate-x-1/2 mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold opacity-0 pointer-events-none"></div>
+
         <div class="text-center">
             <h1 class="text-3xl font-bold text-white">P2P Voice Chat</h1>
             <p class="text-gray-400 mt-2">Connect directly with a friend using your voice.</p>
@@ -107,44 +113,45 @@
             const remoteAudio = document.getElementById('remoteAudio');
             const statusDot = document.getElementById('status-dot');
             const statusText = document.getElementById('status-text');
+            const notificationEl = document.getElementById('notification');
 
             let localStream;
             let currentCall;
+            let notificationTimeout;
             
-            // Using a free, public STUN server from Google.
-            // This helps browsers find each other behind firewalls.
+            // This configuration is updated for better Safari compatibility.
+            // 1. `pingInterval`: Sends a heartbeat to the server more frequently 
+            //    to prevent Safari from closing the connection due to inactivity.
+            // 2. `sdpSemantics`: A standard setting for modern WebRTC that can improve
+            //    cross-browser compatibility.
             const peer = new Peer({
                 config: {
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
-                    ]
-                }
+                    ],
+                    sdpSemantics: 'unified-plan'
+                },
+                pingInterval: 3000 // Pings every 3 seconds
             });
 
             // --- PeerJS Event Listeners ---
 
-            // Fired when the peer successfully connects to the PeerServer.
-            // Your unique ID is generated and ready to be shared.
             peer.on('open', (id) => {
                 console.log('My peer ID is: ' + id);
                 myIdEl.value = id;
                 updateStatus('online', 'Status: Online, ready to call.');
             });
 
-            // Fired when an incoming call is received.
             peer.on('call', (call) => {
                 console.log('Incoming call...');
-                // Ask for permission to use the microphone
                 navigator.mediaDevices.getUserMedia({ video: false, audio: true })
                     .then(stream => {
                         localStream = stream;
-                        localAudio.srcObject = stream; // So you can hear yourself if needed (muted by default)
+                        localAudio.srcObject = stream;
                         
-                        // Answer the call and send our local audio stream
                         call.answer(stream);
                         
-                        // When we receive the remote stream, play it.
                         call.on('stream', (remoteStream) => {
                             console.log('Received remote stream.');
                             remoteAudio.srcObject = remoteStream;
@@ -153,35 +160,33 @@
                         currentCall = call;
                         updateUiForCall();
                         updateStatus('online', `Status: In call with ${call.peer}`);
-
-                        // Handle call closing
                         currentCall.on('close', endCall);
 
                     }).catch(err => {
                         console.error('Failed to get local stream', err);
-                        alert('Could not access your microphone. Please check permissions.');
+                        showNotification('Could not access microphone. Please check permissions.', true);
                     });
             });
 
             peer.on('error', (err) => {
                 console.error('PeerJS error:', err);
-                alert(`An error occurred: ${err.message}. Please refresh the page.`);
+                showNotification(`Error: ${err.message}. Please refresh.`, true);
                 updateStatus('offline', `Status: Error - ${err.type}`);
             });
             
             peer.on('disconnected', () => {
                 console.log('Peer disconnected from server. Attempting to reconnect...');
                 updateStatus('connecting', 'Status: Reconnecting...');
+                // This will automatically try to reconnect with the same ID.
                 peer.reconnect();
             });
 
             // --- UI Event Listeners ---
 
-            // Call button initiates the connection
             callBtn.addEventListener('click', () => {
                 const friendId = friendIdEl.value.trim();
                 if (!friendId) {
-                    alert("Please enter a friend's ID.");
+                    showNotification("Please enter a friend's ID.", true);
                     return;
                 }
 
@@ -203,32 +208,25 @@
                         currentCall = call;
                         updateUiForCall();
                         updateStatus('online', `Status: In call with ${friendId}`);
-                        
-                        // Handle call closing
                         currentCall.on('close', endCall);
 
                     }).catch(err => {
                         console.error('Failed to get local stream', err);
-                        alert('Could not access your microphone. Please check permissions.');
+                        showNotification('Could not access microphone. Please check permissions.', true);
                         updateStatus('online', 'Status: Online, ready to call.');
                     });
             });
             
-            // End Call button
             endCallBtn.addEventListener('click', () => {
                 endCall();
             });
 
-            // Copy ID button
             copyIdBtn.addEventListener('click', () => {
                 myIdEl.select();
+                // A more modern approach might use navigator.clipboard, but execCommand has broader support
+                // and is fine for this internal tool.
                 document.execCommand('copy');
-                copyIdBtn.classList.add('bg-green-600');
-                copyIdBtn.title = "Copied!";
-                setTimeout(() => {
-                    copyIdBtn.classList.remove('bg-green-600');
-                    copyIdBtn.title = "Copy your ID";
-                }, 1500);
+                showNotification("Copied ID!");
             });
 
             // --- Helper Functions ---
@@ -265,10 +263,24 @@
                 statusDot.className = `status-dot ${state}`;
                 statusText.textContent = text;
             }
-            
-            // Initializing status
-            updateStatus('connecting', 'Status: Connecting to server...');
 
+            function showNotification(message, isError = false) {
+                // Clear any existing timeout
+                if (notificationTimeout) {
+                    clearTimeout(notificationTimeout);
+                }
+
+                notificationEl.textContent = message;
+                notificationEl.className = `absolute top-0 left-1/2 -translate-x-1/2 mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold opacity-100 pointer-events-auto ${isError ? 'bg-red-500' : 'bg-blue-500'}`;
+
+                // Hide the notification after 3 seconds
+                notificationTimeout = setTimeout(() => {
+                    notificationEl.style.opacity = '0';
+                    notificationEl.classList.add('pointer-events-none');
+                }, 3000);
+            }
+            
+            updateStatus('connecting', 'Status: Connecting to server...');
         });
     </script>
 </body>
