@@ -229,7 +229,6 @@
                 formData.append('time', expirationSelect.value);
             } else { // catbox
                 apiUrl = CATBOX_API_URL;
-                // Catbox does not support expiration or require a userhash for anonymous uploads.
             }
 
             const xhr = new XMLHttpRequest();
@@ -240,19 +239,25 @@
                     progressBar.style.width = percentComplete.toFixed(2) + '%';
                 }
             });
-
+            
+            // This event handles the response, both success and HTTP errors (404, 500, etc.)
             xhr.addEventListener('load', () => {
                 progressBar.style.width = '100%';
-                if (xhr.status === 200) {
+                if (xhr.status >= 200 && xhr.status < 300) {
                     displayMessage(xhr.responseText, 'success');
                 } else {
-                    displayMessage(`Error: ${xhr.statusText || 'Upload failed'}`, 'error');
+                    const errorMsg = `Error: Upload failed. Server responded with status ${xhr.status}.`;
+                    console.error(errorMsg, xhr.responseText);
+                    displayMessage(errorMsg + " Check the console for details.", 'error');
                 }
                 resetUploaderState();
             });
 
+            // This event handles network-level errors (e.g., connection lost, CORS issue)
             xhr.addEventListener('error', () => {
-                displayMessage('A network error occurred. Please try again.', 'error');
+                const errorMsg = 'A network error occurred. This may be a CORS issue or a connection problem.';
+                console.error(errorMsg, 'If you are running this from a local file, browser security may be blocking the request.');
+                displayMessage(errorMsg + " Check the console for details.", 'error');
                 resetUploaderState();
             });
 
@@ -323,3 +328,4 @@
     </script>
 </body>
 </html>
+
