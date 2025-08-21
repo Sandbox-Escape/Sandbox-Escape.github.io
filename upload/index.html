@@ -126,9 +126,9 @@
         const serviceLitterbox = document.getElementById('serviceLitterbox');
         const serviceCatbox = document.getElementById('serviceCatbox');
 
-        // API endpoints
-        const LITTERBOX_API_URL = 'https://litterbox.catbox.moe/resources/internals/api.php';
-        const CATBOX_API_URL = 'https://catbox.moe/user/api.php';
+        // API endpoints routed through a CORS proxy
+        const LITTERBOX_API_URL = 'https://corsproxy.io/?https://litterbox.catbox.moe/resources/internals/api.php';
+        const CATBOX_API_URL = 'https://corsproxy.io/?https://catbox.moe/user/api.php';
 
         let currentService = 'litterbox'; // Default service
 
@@ -328,4 +328,3 @@
     </script>
 </body>
 </html>
-
