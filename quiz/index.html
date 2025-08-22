@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Programming Quiz Platform</title>
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAACMs/FzAAAAQlBMVEX////y8vL19fX5+fn8/Pz39/f6+vrz8/P////u7u7w8PDt7e3y8vL////w8PD////x8fH////x8fH29vb////x8fH///+Fj/etAAABsklEQVR4nO3b246bMBiA0cgJgYSAQO7/Pms3M6kHnaSj2fP7LgG5B/VqjYSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOC3u+yHl+Tj8Yg8Lp/uT5Pj8Yg8Pj+f7k+T4/GIPD4/n+5Pk+PxiDw+P5/uT5Pj8Yg8Pj+f7k+T4/GIPD4/n+5Pk+PxiDw+P5/uT5Pj8Yg8Pj+f7k+T4/Fk3h8n0+PxfH4+3Z8mx+PxfH4+3Z8mx+PxfH4+3Z8mx+PxfH4+3Z8mx+PxfH4+3Z8mx+PxfH4+3Z8mx+PxfH4+3Z8mx+PxfH4+3Z8mRyP5vD9Pjsfz+fl0f5ocj+fz8+n+NDkez+fn0/1pciy+P02Ox/P5+XR/mhyP5/Pz6f40OR7P5+fT/WlyPJ7Pz6f70+R4PJ+fT/enSXB4fp4cj+fz8+n+NDkez+fn0/1pchy+P02Ox/P5+XR/mhyP5/Pz6f40OR7P5+fT/WlyPJ7Pz6f70+R4PJ+fT/enSXB4fp4cj+fz8+n+NDkez+fn0/1pchy+P02Ox/P5+XR/mhyP5/Pz6f40OR7P5+fT/WlyPJ7Pz6f70+R4PJ+fT/enSXB4fp4AAAAAAAAAAAAAAAAAAAAAAAAAAAAA+A/d62L+AIlqgAAAAABJRU5ErkJggg==">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            padding-bottom: 6rem;
+            overflow-x: hidden;
+        }
+        .card {
+            background: rgba(31, 41, 55, 0.5);
+            border: 1px solid rgba(75, 85, 99, 0.5);
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+
+        .page {
+            display: none;
+            width: 100%;
+            padding: 1rem;
+            min-height: calc(100vh - 6rem);
+        }
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-btn.active {
+            color: #22d3ee;
+        }
+
+        .code-block {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        .code-editor {
+            background: #1f2937;
+            border: 1px solid #374151;
+            color: #e5e7eb;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .option {
+            transition: all 0.2s ease;
+        }
+        .option:hover {
+            background: rgba(75, 85, 99, 0.3);
+        }
+        .option.selected {
+            background: rgba(34, 211, 238, 0.2);
+            border-color: #22d3ee;
+        }
+        .option.correct {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+        }
+        .option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+        }
+
+        .timer {
+            background: linear-gradient(45deg, #dc2626, #ef4444);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #06b6d4, #22d3ee);
+        }
+
+        .test-case {
+            background: #1f2937;
+            border-left: 3px solid #22d3ee;
+        }
+
+        .test-case.passed {
+            border-left-color: #22c55e;
+        }
+
+        .test-case.failed {
+            border-left-color: #ef4444;
+        }
+        #video-intro {
+    display: flex;
+    transition: opacity 0.5s ease-out;
+}
+
+#video-intro.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#intro-video {
+    transition: opacity 0.3s ease;
+}
+
+#video-loading {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+#video-loading.hidden {
+    opacity: 0;
+}
+    </style>
+</head>
+<body class="text-white antialiased">
+<div id="video-intro" class="fixed inset-0 z-50 flex items-center justify-center" style="background-color: #101626;">
+    <div class="relative w-full h-full">
+        <video id="intro-video" class="w-full h-full object-cover" autoplay muted>
+            <source src="https://files.catbox.moe/8ykj71.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        
+        <button id="skip-intro" class="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg hover:bg-opacity-70 transition-all">
+            Skip Intro
+        </button>
+        
+        <div id="video-loading" class="absolute inset-0 flex items-center justify-center bg-black">
+            <div class="text-white text-xl">Loading...</div>
+        </div>
+    </div>
+</div>
+    <div class="relative w-full h-full">
+
+        <div id="home-page" class="page active">
+            <header class="text-center my-8">
+                <div class="w-28 h-28 rounded-full mx-auto mb-4 bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
+                    <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-100">Programming Quiz Platform</h1>
+                <p class="text-md text-gray-400 mt-2 max-w-xl mx-auto">Test your programming knowledge with MCQs and LeetCode-style coding challenges.</p>
+            </header>
+            <main class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold text-center mb-6 text-gray-200">Available Quiz Categories</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="categories-container">
+                    </div>
+                
+                <div class="mt-12 text-center">
+                    <h3 class="text-xl font-bold mb-4 text-gray-200">Quick Stats</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-md mx-auto">
+                        <div class="card rounded-lg p-4">
+                            <div class="text-2xl font-bold text-cyan-400" id="total-quizzes">0</div>
+                            <div class="text-sm text-gray-400">Total Problems</div>
+                        </div>
+                        <div class="card rounded-lg p-4">
+                            <div class="text-2xl font-bold text-green-400" id="completed-quizzes">0</div>
+                            <div class="text-sm text-gray-400">Completed</div>
+                        </div>
+                        <div class="card rounded-lg p-4">
+                            <div class="text-2xl font-bold text-yellow-400" id="average-score">0%</div>
+                            <div class="text-sm text-gray-400">Avg Score</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <div id="quiz-page" class="page">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+                    <button id="back-to-home" class="flex items-center text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Back to Categories
+                    </button>
+                    <div class="timer text-white px-4 py-2 rounded-lg font-bold" id="timer">
+                        Time: 00:00
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex justify-between text-sm text-gray-400 mb-2">
+                        <span>Progress</span>
+                        <span id="question-progress">0 / 0</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="progress-bar h-2 rounded-full transition-all duration-300" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="question-container" class="card rounded-lg p-6 mb-6">
+                    </div>
+
+                <div class="flex justify-between items-center">
+                    <button id="prev-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        Previous
+                    </button>
+                    <button id="next-btn" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="coding-page" class="page">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+                    <button id="back-to-home-coding" class="flex items-center text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Back to Categories
+                    </button>
+                    <div class="timer text-white px-4 py-2 rounded-lg font-bold" id="coding-timer">
+                        Time: 00:00
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex justify-between text-sm text-gray-400 mb-2">
+                        <span>Challenge Progress</span>
+                        <span id="coding-progress">0 / 0</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="progress-bar h-2 rounded-full transition-all duration-300" id="coding-progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="card rounded-lg p-6">
+                            <h2 class="text-2xl font-bold text-white mb-4" id="problem-title">Problem Title</h2>
+                            <div class="text-gray-300 mb-4" id="problem-description">Problem description...</div>
+                            
+                            <div class="mb-4">
+                                <h4 class="font-bold text-white mb-2">Example:</h4>
+                                <div class="bg-gray-800 rounded p-4 font-mono text-sm" id="problem-example">
+                                    Example will appear here...
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h4 class="font-bold text-white mb-2">Constraints:</h4>
+                                <ul class="text-gray-300 text-sm space-y-1" id="problem-constraints">
+                                    <li>• Constraints will appear here...</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card rounded-lg p-6">
+                            <h4 class="font-bold text-white mb-4">Test Cases</h4>
+                            <div id="test-cases" class="space-y-2">
+                                </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="card rounded-lg p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-bold text-white">Code Editor</h4>
+                                <select id="language-select" class="bg-gray-700 text-white rounded px-3 py-1 text-sm">
+                                    <option value="javascript">JavaScript</option>
+                                    <option value="python">Python</option>
+                                    <option value="java">Java</option>
+                                    <option value="cpp">C++</option>
+                                </select>
+                            </div>
+                            <textarea id="code-editor" class="code-editor w-full h-96 rounded p-4 resize-none" placeholder="Write your solution here..."></textarea>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button id="run-code" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex-1">
+                                Run Code
+                            </button>
+                            <button id="submit-code" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex-1">
+                                Submit Solution
+                            </button>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <button id="prev-coding-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                Previous
+                            </button>
+                            <button id="next-coding-btn" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                                Next Challenge
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="results-page" class="page">
+            <div class="max-w-2xl mx-auto text-center">
+                <h1 class="text-3xl font-bold mb-6">Quiz Results</h1>
+                <div class="card rounded-lg p-8 mb-6">
+                    <div class="text-6xl font-bold text-cyan-400 mb-2" id="final-score">0%</div>
+                    <div class="text-xl text-gray-400 mb-4" id="score-message">Good job!</div>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <div class="text-green-400 font-bold text-lg" id="correct-count">0</div>
+                            <div class="text-gray-400">Correct</div>
+                        </div>
+                        <div>
+                            <div class="text-red-400 font-bold text-lg" id="incorrect-count">0</div>
+                            <div class="text-gray-400">Incorrect</div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="text-gray-400 text-sm">Time Taken: <span id="time-taken">00:00</span></div>
+                    </div>
+                </div>
+                <div class="flex gap-4 justify-center">
+                    <button id="retry-quiz" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+                        Retry Quiz
+                    </button>
+                    <button id="home-from-results" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+                        Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="create-page" class="page">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-3xl font-bold text-center mb-8">Create New Programming Problem</h1>
+                
+                <div class="card rounded-lg p-6 mb-6">
+                    <h3 class="text-xl font-bold mb-4">Problem Type</h3>
+                    <div class="flex gap-4">
+                        <button id="mcq-type" class="problem-type-btn bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Multiple Choice Question
+                        </button>
+                        <button id="coding-type" class="problem-type-btn bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Coding Challenge
+                        </button>
+                    </div>
+                </div>
+
+                <form id="create-mcq-form" class="space-y-6">
+                    <div class="card rounded-lg p-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                        <select id="mcq-category-select" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                            <option value="javascript">JavaScript</option>
+                            <option value="python">Python</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                            <option value="algorithms">Algorithms</option>
+                            <option value="data-structures">Data Structures</option>
+                        </select>
+                    </div>
+
+                    <div class="card rounded-lg p-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Question Title</label>
+                        <input type="text" id="mcq-question-title" required class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Enter question title">
+                    </div>
+
+                    <div class="card rounded-lg p-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Problem Description</label>
+                        <textarea id="mcq-question-description" rows="4" required class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Describe the programming problem..."></textarea>
+                    </div>
+
+                    <div class="card rounded-lg p-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Code Example (Optional)</label>
+                        <textarea id="mcq-question-code" rows="6" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 font-mono" placeholder="Enter code example here..."></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="card rounded-lg p-6">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Option A</label>
+                            <input type="text" id="mcq-option-a" required class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                        </div>
+                        <div class="card rounded-lg p-6">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Option B</label>
+                            <input type="text" id="mcq-option-b" required class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                        </div>
+                        <div class="card rounded-lg p-6">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Option C</label>
+                            <input type="text" id="mcq-option-c" required class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                        </div>
+                        <div class="card rounded-lg p-6">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Option D</label>
+                            <input type="text" id="mcq-option-d" required class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                        </div>
+                    </div>
+
+                    <div class="card rounded-lg p-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Correct Answer</label>
+                        <select id="mcq-correct-answer" required class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                            <option value="">Select correct answer</option>
+                            <option value="A">Option A</option>
+                            <option value="B">Option B</option>
+                            <option value="C">Option C</option>
+                            <option value="D">Option D</option>
+                        </select>
+                    </div>
+
+                    <div class="card rounded-lg p-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Explanation</label>
+                        <textarea id="mcq-explanation" rows="3" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Explain why this is the correct answer..."></textarea>
+                    </div>
+
+                    <div class="flex gap-4 justify-center">
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                            Create MCQ Problem
+                        </button>
+                        <button type="button" class="cancel-create bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+
+                <form id="create-coding-form" class="space-y-6" style="display: none;">
+                    <div class="card rounded-lg p-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                        <select id="coding-category-select" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                            <option value="coding-challenges">Coding Challenges</option>
+                            <option value="algorithms">Algorithms</option>
+                            <option value="data-structures">Data Structures</option>
+                        </select>
+                    </div>
+
+                    <div class="card rounded-lg p-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Problem Title</label>
+                        <input type="text" id="coding-problem-title" required class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Enter problem title">
+                    </div>
+
+                    <div class="card rounded-lg p-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Problem Description</label>
+                        <textarea id="coding-problem-description" rows="4" required class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Describe the coding challenge..."></textarea>
+                    </div>
+
+                    <div class="card rounded-lg p-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Example</label>
+                        <textarea id="coding-example" rows="4" required class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 font-mono" placeholder="Input: [1,2,3]&#10;Output: [3,2,1]&#10;Explanation: Reverse the array"></textarea>
+                    </div>
+
+                    <div class="card rounded-lg p-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Constraints</label>
+                        <textarea id="coding-constraints" rows="3" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="• 1 ≤ array length ≤ 1000&#10;• -100 ≤ elements ≤ 100"></textarea>
+                    </div>
+
+                    <div class="card rounded-lg p-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Solution Template (JavaScript)</label>
+                        <textarea id="coding-template" rows="6" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 font-mono" placeholder="function solution(input) {&#10;    // Your code here&#10;    return result;&#10;}"></textarea>
+                    </div>
+
+                    <div class="flex gap-4 justify-center">
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                            Create Coding Challenge
+                        </button>
+                        <button type="button" class="cancel-create bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-gray-800 border-t border-gray-700">
+        <div class="container mx-auto">
+            <div class="flex items-center justify-around h-20">
+                <button id="home-btn" class="nav-btn flex flex-col items-center justify-center transition-colors active text-cyan-400">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span class="text-xs mt-1">Home</span>
+                </button>
+                <button id="quiz-btn" class="nav-btn flex flex-col items-center justify-center text-gray-400 hover:text-cyan-400 transition-colors">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span class="text-xs mt-1">Quiz</span>
+                </button>
+                <button id="results-btn" class="nav-btn flex flex-col items-center justify-center text-gray-400 hover:text-cyan-400 transition-colors">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00 2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span class="text-xs mt-1">Results</span>
+                </button>
+                <button id="create-btn" class="nav-btn flex flex-col items-center justify-center text-gray-400 hover:text-cyan-400 transition-colors">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span class="text-xs mt-1">Create</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <script>
+        // Video intro functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const videoIntro = document.getElementById('video-intro');
+    const introVideo = document.getElementById('intro-video');
+    const skipButton = document.getElementById('skip-intro');
+    const videoLoading = document.getElementById('video-loading');
+
+    // Hide loading indicator when video is ready
+    introVideo.addEventListener('canplay', function() {
+        videoLoading.classList.add('hidden');
+    });
+
+    // Function to end intro
+    function endIntro() {
+        videoIntro.classList.add('hidden');
+        setTimeout(() => {
+            videoIntro.style.display = 'none';
+        }, 500);
+    }
+
+    // End intro when video ends
+    introVideo.addEventListener('ended', endIntro);
+
+    // Skip button functionality
+    skipButton.addEventListener('click', endIntro);
+
+    // Auto-skip after 4 seconds (optional)
+    setTimeout(endIntro, 4000);
+
+    // Continue with existing initialization...
+    initHomePage();
+    // ... rest of your existing DOMContentLoaded code
+});
+        // Quiz data structure
+        const quizCategories = {
+            javascript: {
+                name: "JavaScript",
+                icon: "💛",
+                type: "mcq",
+                questions: [
+                    {
+                        title: "JavaScript Variable Hoisting",
+                        description: "What will be the output of this code?",
+                        code: `console.log(x);
+var x = 5;
+console.log(x);`,
+                        options: {
+                            A: "undefined, 5",
+                            B: "ReferenceError",
+                            C: "5, 5", 
+                            D: "null, 5"
+                        },
+                        correct: "A",
+                        explanation: "Due to hoisting, var declarations are moved to the top but initialization stays in place."
+                    },
+                    {
+                        title: "Array Methods",
+                        description: "Which method adds elements to the end of an array?",
+                        options: {
+                            A: "unshift()",
+                            B: "push()",
+                            C: "pop()",
+                            D: "shift()"
+                        },
+                        correct: "B",
+                        explanation: "push() adds elements to the end, while unshift() adds to the beginning."
+                    }
+                ]
+            },
+            python: {
+                name: "Python",
+                icon: "🐍",
+                type: "mcq",
+                questions: [
+                    {
+                        title: "Python List Slicing",
+                        description: "What is the output of this Python code?",
+                        code: `my_list = [1, 2, 3, 4, 5]
+print(my_list[1:4])`,
+                        options: {
+                            A: "[1, 2, 3]",
+                            B: "[2, 3, 4]",
+                            C: "[2, 3, 4, 5]",
+                            D: "[1, 2, 3, 4]"
+                        },
+                        correct: "B",
+                        explanation: "Python slicing [1:4] includes index 1, 2, 3 but excludes 4."
+                    }
+                ]
+            },
+            algorithms: {
+                name: "Algorithms",
+                icon: "🧮",
+                type: "mcq",
+                questions: [
+                    {
+                        title: "Time Complexity",
+                        description: "What is the time complexity of binary search?",
+                        options: {
+                            A: "O(n)",
+                            B: "O(log n)",
+                            C: "O(n log n)",
+                            D: "O(n²)"
+                        },
+                        correct: "B",
+                        explanation: "Binary search eliminates half the search space in each iteration."
+                    }
+                ]
+            },
+            "coding-challenges": {
+                name: "Coding Challenges",
+                icon: "💻",
+                type: "coding",
+                problems: [
+                    {
+                        title: "Two Sum",
+                        description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+                        example: `Input: nums = [2,7,11,15], target = 9
+Output: [0,1]
+Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].`,
+                        constraints: [
+                            "2 ≤ nums.length ≤ 10⁴",
+                            "-10⁹ ≤ nums[i] ≤ 10⁹",
+                            "-10⁹ ≤ target ≤ 10⁹",
+                            "Only one valid answer exists."
+                        ],
+                        template: {
+                            javascript: `function twoSum(nums, target) {
+    // Your solution here
+    
+}`,
+                            python: `def two_sum(nums, target):
+    # Your solution here
+    pass`,
+                            java: `public int[] twoSum(int[] nums, int target) {
+    // Your solution here
+    
+}`,
+                            cpp: `vector<int> twoSum(vector<int>& nums, int target) {
+    // Your solution here
+    
+}`
+                        },
+                        testCases: [
+                            { input: [[2,7,11,15], 9], expected: [0,1] },
+                            { input: [[3,2,4], 6], expected: [1,2] },
+                            { input: [[3,3], 6], expected: [0,1] }
+                        ]
+                    },
+                    {
+                        title: "Reverse String",
+                        description: "Write a function that reverses a string. The input string is given as an array of characters s.",
+                        example: `Input: s = ["h","e","l","l","o"]
+Output: ["o","l","l","e","h"]`,
+                        constraints: [
+                            "1 ≤ s.length ≤ 10⁵",
+                            "s[i] is a printable ascii character."
+                        ],
+                        template: {
+                            javascript: `function reverseString(s) {
+    // Your solution here
+    
+}`,
+                            python: `def reverse_string(s):
+    # Your solution here
+    pass`,
+                            java: `public void reverseString(char[] s) {
+    // Your solution here
+    
+}`,
+                            cpp: `void reverseString(vector<char>& s) {
+    // Your solution here
+    
+}`
+                        },
+                        testCases: [
+                            { input: [["h","e","l","l","o"]], expected: ["o","l","l","e","h"] },
+                            { input: [["H","a","n","n","a","h"]], expected: ["h","a","n","n","a","H"] }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // App state
+        let currentCategory = null;
+        let currentQuestionIndex = 0;
+        let currentProblemIndex = 0;
+        let userAnswers = [];
+        let userSolutions = {};
+        let quizStartTime = null;
+        let timerInterval = null;
+        let currentActivePage = 'home-page';
+        let currentQuizType = 'mcq';
+
+        // Navigation functions
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show target page
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+
+            // Update navigation buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-cyan-400');
+                btn.classList.add('text-gray-400');
+            });
+
+            const activeNavBtn = document.getElementById(`${pageId.split('-')[0]}-btn`);
+            if (activeNavBtn) {
+                activeNavBtn.classList.add('active', 'text-cyan-400');
+                activeNavBtn.classList.remove('text-gray-400');
+            }
+
+            currentActivePage = pageId;
+        }
+
+        // Initialize home page
+        function initHomePage() {
+            const categoriesContainer = document.getElementById('categories-container');
+            categoriesContainer.innerHTML = '';
+            
+            Object.entries(quizCategories).forEach(([key, category]) => {
+                const categoryCard = document.createElement('div');
+                categoryCard.className = 'card rounded-lg p-6 cursor-pointer hover:bg-gray-700 transition-all transform hover:scale-105';
+                
+                const problemCount = category.type === 'mcq' ? 
+                    category.questions.length : 
+                    category.problems.length;
+                    
+                const problemType = category.type === 'mcq' ? 'MCQ Problems' : 'Coding Challenges';
+                
+                categoryCard.innerHTML = `
+                    <div class="text-4xl text-center mb-4">${category.icon}</div>
+                    <h3 class="text-xl font-bold text-center text-white mb-2">${category.name}</h3>
+                    <p class="text-gray-400 text-center text-sm mb-2">${problemCount} ${problemType}</p>
+                    <p class="text-gray-500 text-center text-xs mb-4">${category.type.toUpperCase()}</p>
+                    <div class="text-center">
+                        <button class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Start ${category.type === 'mcq' ? 'Quiz' : 'Challenge'}
+                        </button>
+                    </div>
+                `;
+                
+                categoryCard.addEventListener('click', () => {
+                    if (category.type === 'mcq') {
+                        startQuiz(key);
+                    } else {
+                        startCodingChallenge(key);
+                    }
+                });
+                categoriesContainer.appendChild(categoryCard);
+            });
+
+            updateStats();
+        }
+
+        function updateStats() {
+            let totalProblems = 0;
+            Object.values(quizCategories).forEach(cat => {
+                if (cat.type === 'mcq') {
+                    totalProblems += cat.questions.length;
+                } else {
+                    totalProblems += cat.problems.length;
+                }
+            });
+            
+            document.getElementById('total-quizzes').textContent = totalProblems;
+            
+            // Use in-memory storage for stats
+            const savedScores = JSON.parse(sessionStorage.getItem('quiz-scores') || '[]');
+            document.getElementById('completed-quizzes').textContent = savedScores.length;
+            
+            if (savedScores.length > 0) {
+                const avgScore = savedScores.reduce((sum, score) => sum + score, 0) / savedScores.length;
+                document.getElementById('average-score').textContent = Math.round(avgScore) + '%';
+            }
+        }
+
+        // MCQ Quiz functions
+        function startQuiz(categoryKey) {
+            currentCategory = categoryKey;
+            currentQuestionIndex = 0;
+            currentQuizType = 'mcq';
+            userAnswers = [];
+            quizStartTime = Date.now();
+            
+            showPage('quiz-page');
+            startTimer();
+            displayQuestion();
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - quizStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                const timeStr = `Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                const timerElement = document.getElementById('timer');
+                const codingTimerElement = document.getElementById('coding-timer');
+                
+                if (timerElement) timerElement.textContent = timeStr;
+                if (codingTimerElement) codingTimerElement.textContent = timeStr;
+            }, 1000);
+        }
+
+        function displayQuestion() {
+            const category = quizCategories[currentCategory];
+            const question = category.questions[currentQuestionIndex];
+            
+            if (!question) {
+                showResults();
+                return;
+            }
+
+            // Update progress
+            const progress = ((currentQuestionIndex + 1) / category.questions.length) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+            document.getElementById('question-progress').textContent = `${currentQuestionIndex + 1} / ${category.questions.length}`;
+
+            // Build question HTML
+            let questionHTML = `
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-white mb-4">${question.title}</h2>
+                    <p class="text-gray-300 mb-4">${question.description}</p>
+            `;
+
+            if (question.code) {
+                questionHTML += `
+                    <div class="code-block mb-4">
+                        <code class="text-green-400">${question.code}</code>
+                    </div>
+                `;
+            }
+
+            questionHTML += `
+                </div>
+                <div class="space-y-3">
+            `;
+
+            Object.entries(question.options).forEach(([key, option]) => {
+                const isSelected = userAnswers[currentQuestionIndex] === key;
+                questionHTML += `
+                    <div class="option card rounded-lg p-4 cursor-pointer border-2 ${isSelected ? 'selected' : 'border-gray-600'}" data-option="${key}">
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 rounded-full border-2 border-gray-400 mr-4 flex items-center justify-center ${isSelected ? 'bg-cyan-500 border-cyan-500' : ''}">
+                                ${isSelected ? '<div class="w-2 h-2 bg-white rounded-full"></div>' : ''}
+                            </div>
+                            <span class="text-white"><strong>${key}:</strong> ${option}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            questionHTML += `</div>`;
+            document.getElementById('question-container').innerHTML = questionHTML;
+
+            // Add event listeners to options
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', () => selectAnswer(option.dataset.option));
+            });
+
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+            document.getElementById('next-btn').textContent = 
+                currentQuestionIndex === category.questions.length - 1 ? 'Finish Quiz' : 'Next';
+        }
+
+        function selectAnswer(answer) {
+            userAnswers[currentQuestionIndex] = answer;
+            
+            // Update UI
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.toggle('selected', option.dataset.option === answer);
+                const radio = option.querySelector('.w-6');
+                
+                if (option.dataset.option === answer) {
+                    radio.classList.add('bg-cyan-500', 'border-cyan-500');
+                    radio.classList.remove('border-gray-400');
+                    radio.innerHTML = '<div class="w-2 h-2 bg-white rounded-full"></div>';
+                } else {
+                    radio.classList.remove('bg-cyan-500', 'border-cyan-500');
+                    radio.classList.add('border-gray-400');
+                    radio.innerHTML = '';
+                }
+            });
+        }
+
+        function nextQuestion() {
+            const category = quizCategories[currentCategory];
+            
+            if (currentQuizType === 'mcq') {
+                if (currentQuestionIndex < category.questions.length - 1) {
+                    currentQuestionIndex++;
+                    displayQuestion();
+                } else {
+                    showResults();
+                }
+            } else {
+                if (currentProblemIndex < category.problems.length - 1) {
+                    currentProblemIndex++;
+                    displayCodingProblem();
+                } else {
+                    showCodingResults();
+                }
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuizType === 'mcq') {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    displayQuestion();
+                }
+            } else {
+                if (currentProblemIndex > 0) {
+                    currentProblemIndex--;
+                    displayCodingProblem();
+                }
+            }
+        }
+
+        // Coding Challenge functions
+        function startCodingChallenge(categoryKey) {
+            currentCategory = categoryKey;
+            currentProblemIndex = 0;
+            currentQuizType = 'coding';
+            userSolutions = {};
+            quizStartTime = Date.now();
+            
+            showPage('coding-page');
+            startTimer();
+            displayCodingProblem();
+        }
+
+        function displayCodingProblem() {
+            const category = quizCategories[currentCategory];
+            const problem = category.problems[currentProblemIndex];
+            
+            if (!problem) {
+                showCodingResults();
+                return;
+            }
+
+            // Update progress
+            const progress = ((currentProblemIndex + 1) / category.problems.length) * 100;
+            document.getElementById('coding-progress-fill').style.width = `${progress}%`;
+            document.getElementById('coding-progress').textContent = `${currentProblemIndex + 1} / ${category.problems.length}`;
+
+            // Update problem details
+            document.getElementById('problem-title').textContent = problem.title;
+            document.getElementById('problem-description').textContent = problem.description;
+            document.getElementById('problem-example').textContent = problem.example;
+            
+            // Update constraints
+            const constraintsList = document.getElementById('problem-constraints');
+            constraintsList.innerHTML = '';
+            problem.constraints.forEach(constraint => {
+                const li = document.createElement('li');
+                li.textContent = `• ${constraint}`;
+                constraintsList.appendChild(li);
+            });
+
+            // Set initial code template
+            const languageSelect = document.getElementById('language-select');
+            const codeEditor = document.getElementById('code-editor');
+            const currentLanguage = languageSelect.value;
+            
+            if (userSolutions[currentProblemIndex] && userSolutions[currentProblemIndex][currentLanguage]) {
+                codeEditor.value = userSolutions[currentProblemIndex][currentLanguage];
+            } else {
+                codeEditor.value = problem.template[currentLanguage] || '';
+            }
+
+            // Clear test cases
+            document.getElementById('test-cases').innerHTML = '';
+
+            // Update navigation buttons
+            document.getElementById('prev-coding-btn').disabled = currentProblemIndex === 0;
+            document.getElementById('next-coding-btn').textContent = 
+                currentProblemIndex === category.problems.length - 1 ? 'Finish Challenge' : 'Next Challenge';
+        }
+
+        function runCode() {
+            const category = quizCategories[currentCategory];
+            const problem = category.problems[currentProblemIndex];
+            const code = document.getElementById('code-editor').value;
+            const language = document.getElementById('language-select').value;
+
+            // Save current solution
+            if (!userSolutions[currentProblemIndex]) {
+                userSolutions[currentProblemIndex] = {};
+            }
+            userSolutions[currentProblemIndex][language] = code;
+
+            // Simple test execution (mock implementation)
+            const testCasesContainer = document.getElementById('test-cases');
+            testCasesContainer.innerHTML = '';
+
+            problem.testCases.forEach((testCase, index) => {
+                const testDiv = document.createElement('div');
+                testDiv.className = 'test-case p-3 rounded';
+                
+                // Mock test execution - in real app, this would run in a sandbox
+                let passed = false;
+                let output = 'Error';
+                
+                try {
+                    if (language === 'javascript' && code.includes('function')) {
+                        // Very basic mock execution for demo
+                        if (problem.title === 'Two Sum' && code.includes('return')) {
+                            passed = Math.random() > 0.3; // 70% chance of passing for demo
+                            output = passed ? JSON.stringify(testCase.expected) : '[0,0]';
+                        } else if (problem.title === 'Reverse String' && code.includes('reverse')) {
+                            passed = Math.random() > 0.2; // 80% chance of passing for demo
+                            output = passed ? JSON.stringify(testCase.expected) : '["h","e","l","l","o"]';
+                        }
+                    }
+                } catch (e) {
+                    passed = false;
+                    output = 'Runtime Error';
+                }
+
+                testDiv.classList.add(passed ? 'passed' : 'failed');
+                testDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold">Test Case ${index + 1}</span>
+                        <span class="px-2 py-1 rounded text-xs ${passed ? 'bg-green-600' : 'bg-red-600'}">
+                            ${passed ? 'PASSED' : 'FAILED'}
+                        </span>
+                    </div>
+                    <div class="text-sm space-y-1">
+                        <div><strong>Input:</strong> ${JSON.stringify(testCase.input)}</div>
+                        <div><strong>Expected:</strong> ${JSON.stringify(testCase.expected)}</div>
+                        <div><strong>Output:</strong> ${output}</div>
+                    </div>
+                `;
+                
+                testCasesContainer.appendChild(testDiv);
+            });
+        }
+
+        function submitCode() {
+            runCode();
+            
+            // Check if all test cases passed
+            const passedTests = document.querySelectorAll('.test-case.passed').length;
+            const totalTests = document.querySelectorAll('.test-case').length;
+            
+            if (passedTests === totalTests) {
+                alert(`🎉 All test cases passed! (${passedTests}/${totalTests})`);
+            } else {
+                alert(`❌ ${passedTests}/${totalTests} test cases passed. Keep trying!`);
+            }
+        }
+
+        function showResults() {
+            clearInterval(timerInterval);
+            
+            const category = quizCategories[currentCategory];
+            let correctCount = 0;
+            
+            category.questions.forEach((question, index) => {
+                if (userAnswers[index] === question.correct) {
+                    correctCount++;
+                }
+            });
+
+            const totalQuestions = category.questions.length;
+            const scorePercentage = Math.round((correctCount / totalQuestions) * 100);
+            const timeElapsed = Math.floor((Date.now() - quizStartTime) / 1000);
+            const minutes = Math.floor(timeElapsed / 60);
+            const seconds = timeElapsed % 60;
+
+            // Update results page
+            document.getElementById('final-score').textContent = `${scorePercentage}%`;
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('incorrect-count').textContent = totalQuestions - correctCount;
+            document.getElementById('time-taken').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            // Set score message
+            const scoreMessage = document.getElementById('score-message');
+            if (scorePercentage >= 90) {
+                scoreMessage.textContent = "Excellent! You're a programming expert! 🎉";
+            } else if (scorePercentage >= 70) {
+                scoreMessage.textContent = "Great job! Keep up the good work! 👏";
+            } else if (scorePercentage >= 50) {
+                scoreMessage.textContent = "Not bad! There's room for improvement. 📚";
+            } else {
+                scoreMessage.textContent = "Keep practicing! You'll get better. 💪";
+            }
+
+            // Save score 
+            const savedScores = JSON.parse(sessionStorage.getItem('quiz-scores') || '[]');
+            savedScores.push(scorePercentage);
+            sessionStorage.setItem('quiz-scores', JSON.stringify(savedScores));
+
+            showPage('results-page');
+        }
+
+        function showCodingResults() {
+            clearInterval(timerInterval);
+            
+            // For coding challenges, show completion message
+            const timeElapsed = Math.floor((Date.now() - quizStartTime) / 1000);
+            const minutes = Math.floor(timeElapsed / 60);
+            const seconds = timeElapsed % 60;
+
+            document.getElementById('final-score').textContent = "100%";
+            document.getElementById('score-message').textContent = "Coding challenge completed! 💻";
+            document.getElementById('correct-count').textContent = Object.keys(userSolutions).length;
+            document.getElementById('incorrect-count').textContent = 0;
+            document.getElementById('time-taken').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            showPage('results-page');
+        }
+
+        // Create functionality
+        function handleCreateMCQ(event) {
+            event.preventDefault();
+            
+            const newQuestion = {
+                title: document.getElementById('mcq-question-title').value,
+                description: document.getElementById('mcq-question-description').value,
+                code: document.getElementById('mcq-question-code').value || undefined,
+                options: {
+                    A: document.getElementById('mcq-option-a').value,
+                    B: document.getElementById('mcq-option-b').value,
+                    C: document.getElementById('mcq-option-c').value,
+                    D: document.getElementById('mcq-option-d').value
+                },
+                correct: document.getElementById('mcq-correct-answer').value,
+                explanation: document.getElementById('mcq-explanation').value || "No explanation provided."
+            };
+
+            const category = document.getElementById('mcq-category-select').value;
+            
+            if (!quizCategories[category]) {
+                alert('Invalid category selected');
+                return;
+            }
+
+            quizCategories[category].questions.push(newQuestion);
+            event.target.reset();
+            alert('MCQ Problem created successfully!');
+            showPage('home-page');
+            initHomePage();
+        }
+
+        function handleCreateCoding(event) {
+            event.preventDefault();
+            
+            const newProblem = {
+                title: document.getElementById('coding-problem-title').value,
+                description: document.getElementById('coding-problem-description').value,
+                example: document.getElementById('coding-example').value,
+                constraints: document.getElementById('coding-constraints').value.split('\n').filter(c => c.trim()),
+                template: {
+                    javascript: document.getElementById('coding-template').value
+                },
+                testCases: [
+                    { input: [1, 2], expected: 3 } // Default test case
+                ]
+            };
+
+            const category = document.getElementById('coding-category-select').value;
+            
+            if (!quizCategories[category]) {
+                alert('Invalid category selected');
+                return;
+            }
+
+            if (!quizCategories[category].problems) {
+                quizCategories[category].problems = [];
+            }
+
+            quizCategories[category].problems.push(newProblem);
+            event.target.reset();
+            alert('Coding Challenge created successfully!');
+            showPage('home-page');
+            initHomePage();
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initHomePage();
+
+            // Navigation
+            document.getElementById('home-btn').addEventListener('click', () => {
+                showPage('home-page');
+                initHomePage();
+            });
+
+            document.getElementById('quiz-btn').addEventListener('click', () => {
+                showPage('home-page');
+                initHomePage();
+            });
+
+            document.getElementById('results-btn').addEventListener('click', () => {
+                showPage('home-page');
+                initHomePage();
+            });
+
+            document.getElementById('create-btn').addEventListener('click', () => {
+                showPage('create-page');
+            });
+
+            // Quiz navigation
+            document.getElementById('back-to-home').addEventListener('click', () => {
+                clearInterval(timerInterval);
+                showPage('home-page');
+                initHomePage();
+            });
+
+            document.getElementById('back-to-home-coding').addEventListener('click', () => {
+                clearInterval(timerInterval);
+                showPage('home-page');
+                initHomePage();
+            });
+
+            document.getElementById('next-btn').addEventListener('click', nextQuestion);
+            document.getElementById('prev-btn').addEventListener('click', prevQuestion);
+            
+            document.getElementById('next-coding-btn').addEventListener('click', nextQuestion);
+            document.getElementById('prev-coding-btn').addEventListener('click', prevQuestion);
+
+            // Coding challenge controls
+            document.getElementById('run-code').addEventListener('click', runCode);
+            document.getElementById('submit-code').addEventListener('click', submitCode);
+
+            // Language selector
+            document.getElementById('language-select').addEventListener('change', function() {
+                const category = quizCategories[currentCategory];
+                if (category && category.problems) {
+                    const problem = category.problems[currentProblemIndex];
+                    const codeEditor = document.getElementById('code-editor');
+                    const currentLanguage = this.value;
+                    
+                    if (userSolutions[currentProblemIndex] && userSolutions[currentProblemIndex][currentLanguage]) {
+                        codeEditor.value = userSolutions[currentProblemIndex][currentLanguage];
+                    } else if (problem && problem.template[currentLanguage]) {
+                        codeEditor.value = problem.template[currentLanguage];
+                    } else {
+                        codeEditor.value = '';
+                    }
+                }
+            });
+
+            // Results page buttons
+            document.getElementById('retry-quiz').addEventListener('click', () => {
+                if (currentCategory && currentQuizType === 'mcq') {
+                    startQuiz(currentCategory);
+                } else if (currentCategory && currentQuizType === 'coding') {
+                    startCodingChallenge(currentCategory);
+                }
+            });
+
+            document.getElementById('home-from-results').addEventListener('click', () => {
+                showPage('home-page');
+                initHomePage();
+            });
+
+            // Create quiz form type switcher
+            document.getElementById('mcq-type').addEventListener('click', () => {
+                document.getElementById('create-mcq-form').style.display = 'block';
+                document.getElementById('create-coding-form').style.display = 'none';
+                document.getElementById('mcq-type').classList.add('bg-cyan-600');
+                document.getElementById('mcq-type').classList.remove('bg-gray-600');
+                document.getElementById('coding-type').classList.add('bg-gray-600');
+                document.getElementById('coding-type').classList.remove('bg-cyan-600');
+            });
+
+            document.getElementById('coding-type').addEventListener('click', () => {
+                document.getElementById('create-mcq-form').style.display = 'none';
+                document.getElementById('create-coding-form').style.display = 'block';
+                document.getElementById('coding-type').classList.add('bg-cyan-600');
+                document.getElementById('coding-type').classList.remove('bg-gray-600');
+                document.getElementById('mcq-type').classList.add('bg-gray-600');
+                document.getElementById('mcq-type').classList.remove('bg-cyan-600');
+            });
+
+            // Create forms
+            document.getElementById('create-mcq-form').addEventListener('submit', handleCreateMCQ);
+            document.getElementById('create-coding-form').addEventListener('submit', handleCreateCoding);
+            
+            // Cancel buttons
+            document.querySelectorAll('.cancel-create').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showPage('home-page');
+                    initHomePage();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
