@@ -127,7 +127,7 @@
 <body class="text-white antialiased">
 <div id="video-intro" class="fixed inset-0 z-50 flex items-center justify-center" style="background-color: #101626;">
     <div class="relative w-full h-full">
-        <video id="intro-video" class="w-full h-full object-cover" autoplay muted>
+        <video id="intro-video" class="w-full h-full object-contain" autoplay muted playsinline>
             <source src="https://files.catbox.moe/8ykj71.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
@@ -511,6 +511,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const introVideo = document.getElementById('intro-video');
     const skipButton = document.getElementById('skip-intro');
     const videoLoading = document.getElementById('video-loading');
+
+    // Force autoplay with JavaScript
+    const playPromise = introVideo.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.error("Autoplay was prevented:", error);
+            // Optionally, show a play button to the user as a fallback
+        });
+    }
 
     // Hide loading indicator when video is ready
     introVideo.addEventListener('canplay', function() {
