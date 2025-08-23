@@ -43,7 +43,7 @@ Well that was a waste of time. All I got is a welcome message :/
 
 Remember the original scan I did. Well I tried every port listed and got an interesting result from port 113 when doing a Netcat scan.
 
-![Using Google Drive for this one as Catbox gave up](https://drive.google.com/file/d/1jv9kwNrGHMtKjkNGU8ZcXQpcCuKgF-0i/view?usp=sharing)
+![Idk what to put here 😭](https://files.catbox.moe/l0v4ls.png)
 
 This is great progress from before.
 
@@ -51,11 +51,11 @@ I will go to the following address as in: http://10.10.30.125/key_rev_key
 
 Let's see what happens!
 
-![A prompt for a download from said address :)](https://drive.google.com/file/d/1ElC_Qbjdx1xkAxNl8IEOdO_51wk-qj0B/view?usp=share_link)
+![A prompt for a download from said address :)](https://files.catbox.moe/pwnco2.png)
 
 Well what happens if I extract the file.
 
-![I scrolled down after running: strings key_rev_key](https://drive.google.com/file/d/1ElC_Qbjdx1xkAxNl8IEOdO_51wk-qj0B/view?usp=share_link)
+![I scrolled down after running: strings key_rev_key](https://files.catbox.moe/34oz92.png)
 
 And there is the answer. Submitting it shows it is correct.
 
