@@ -1,5 +1,5 @@
 ---
-title: 'so i decided to make a blog about cybersecurity related things, like try hack me rooms'
+title: "so i decided to make a blog about cybersecurity related things, like try hack me rooms"
 date: 2025-08-23
 ---
 
