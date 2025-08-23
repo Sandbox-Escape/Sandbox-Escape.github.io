@@ -8,6 +8,7 @@ This is my first post written in **Markdown**. It's much easier to write this wa
 The new `index.html` file on my site automatically fetches these `.md` files, uses a library to convert them to HTML, and displays them.
 
 ### Features
+
 * Simple bullet points
 * **Bold** and *italic* text
 * Code blocks
