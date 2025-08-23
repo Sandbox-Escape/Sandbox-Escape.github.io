@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Awesome Blog</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 2rem auto; padding: 2rem; }
+        article { border-bottom: 1px solid #eee; padding-bottom: 2rem; margin-bottom: 2rem; }
+        h1, h2, h3 { color: #333; }
+        img { max-width: 100%; height: auto; border-radius: 8px; }
+        .post-meta { color: #888; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>My Awesome Blog</h1>
+        <p>Thoughts, stories, and ideas.</p>
+    </header>
+    <main id="blog-posts"></main>
+
+    <script>
+        // --- Configuration ---
+        const GITHUB_REPO = 'your-username/your-username.github.io'; // e.g., 'johndoe/johndoe.github.io'
+        const POSTS_DIR = '_posts';
+
+        async function loadBlog() {
+            const postsContainer = document.getElementById('blog-posts');
+            postsContainer.innerHTML = '<p>Loading posts...</p>';
+
+            try {
+                // 1. Get the list of post files from the GitHub repo
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${POSTS_DIR}`);
+                if (!response.ok) throw new Error('Could not fetch posts list.');
+                
+                const files = await response.json();
+                // Filter for .json files and sort by name (newest first if using YYYY-MM-DD format)
+                const postFiles = files.filter(file => file.name.endsWith('.json')).sort((a, b) => b.name.localeCompare(a.name));
+
+                if (postFiles.length === 0) {
+                    postsContainer.innerHTML = '<p>No posts yet. Go publish one!</p>';
+                    return;
+                }
+
+                postsContainer.innerHTML = ''; // Clear loading message
+
+                // 2. Fetch and render each post
+                for (const file of postFiles) {
+                    const postResponse = await fetch(file.download_url);
+                    const post = await postResponse.json();
+                    renderPost(post, postsContainer);
+                }
+
+            } catch (error) {
+                console.error(error);
+                postsContainer.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
+            }
+        }
+
+        function renderPost(post, container) {
+            const article = document.createElement('article');
+            let contentHtml = `<h2>${post.title}</h2>`;
+            contentHtml += `<p class="post-meta">Published on: ${new Date(post.date).toLocaleDateString()}</p>`;
+
+            post.content.forEach(item => {
+                switch (item.type) {
+                    case 'h2':
+                    case 'h3':
+                    case 'h4':
+                    case 'h5':
+                    case 'h6':
+                        contentHtml += `<${item.type}>${item.text}</${item.type}>`;
+                        break;
+                    case 'p':
+                        contentHtml += `<p>${item.text}</p>`;
+                        break;
+                    case 'image':
+                        contentHtml += `<img src="${item.src}" alt="${item.alt || post.title}">`;
+                        break;
+                }
+            });
+
+            article.innerHTML = contentHtml;
+            container.appendChild(article);
+        }
+
+        // Load the blog when the page is ready
+        document.addEventListener('DOMContentLoaded', loadBlog);
+    </script>
+</body>
+</html>
