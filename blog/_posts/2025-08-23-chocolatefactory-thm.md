@@ -104,7 +104,7 @@ Something is loading?
 
 Let's check netcat now
 
-update: I am using a macOS machine so unfortunatly I can't show you my results. I will link the images from another write-up and I will have a link below. If you find a solution feel free to send me a message on Discord, @noah_deyck or email me at brevity.slicer9f@icloud.com
+update: I am using a macOS machine so unfortunatly I can't show you my results because the command cant run as netcat works differently for some reason. I will link the images from another write-up and I will have a link below. If you find a solution feel free to send me a message on Discord, @noah_deyck or email me at brevity.slicer9f@icloud.com
 
 Let's also run Netcat to scan the payload response. 
 
