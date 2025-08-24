@@ -16,16 +16,28 @@ layout: default
 
         <article class="max-w-3xl mx-auto">
             <!-- Post Header -->
-            <header class="mb-8">
+            <header class="mb-8 border-b pb-6">
                 <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-4">{{ page.title }}</h1>
-                <p class="text-gray-500 text-lg">
-                    {{ page.date | date: "%B %d, %Y" }}
-                </p>
+                <div class="flex items-center text-gray-500 text-base">
+                    <span>{{ page.date | date: "%B %d, %Y" }}</span>
+                    <!-- Writers Section -->
+                    {% if page.writers %}
+                        <span class="mx-2">&middot;</span>
+                        <span>Written by {{ page.writers | join: ", " }}</span>
+                    {% endif %}
+                </div>
             </header>
 
-            <!-- Hero Image -->
+            <!-- Hero Image with Caption -->
             {% if page.image %}
-                <img src="{{ page.image }}" alt="{{ page.title }}" class="w-full rounded-xl shadow-lg mb-8" onerror="this.onerror=null;this.src='https://placehold.co/1200x600/e2e8f0/94a3b8?text=Image+Not+Found';">
+                <figure class="mb-8">
+                    <img src="{{ page.image }}" alt="{{ page.image_alt | default: page.title }}" class="w-full rounded-xl shadow-lg" onerror="this.onerror=null;this.src='https://placehold.co/1200x600/e2e8f0/94a3b8?text=Image+Not+Found';">
+                    {% if page.image_alt %}
+                        <figcaption class="text-center text-sm text-gray-600 mt-3 italic">
+                            {{ page.image_alt }}
+                        </figcaption>
+                    {% endif %}
+                </figure>
             {% endif %}
 
             <!-- Post Content -->
