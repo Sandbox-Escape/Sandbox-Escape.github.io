@@ -2,6 +2,7 @@
 title: "I did the TryHackMe Chocolate Factory Lab, so here is a walkthrough"
 date: 2025-8-23
 image: https://dvanmosselbeen.github.io/TryHackMe_writeups/chocolatefactory/files/golden-ticket.jpg
+layout: post
 ---
 
 I decided to go through the TryHackMe Chocolate Factory room. Here is a walkthrough of what I did.
