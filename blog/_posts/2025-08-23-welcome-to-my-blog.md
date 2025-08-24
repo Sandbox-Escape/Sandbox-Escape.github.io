@@ -1,6 +1,7 @@
 ---
 title: "so i decided to make a blog about cybersecurity related things, like try hack me rooms"
 date: 2025-08-23
+layout: post
 ---
 
 This is my first post written in **Markdown**. It's much easier to write this way!
