@@ -5,53 +5,56 @@ title: Blog
 
 <!-- 
   This is a clean, modern blog layout using Tailwind CSS.
-  It displays posts in a responsive grid of cards, each with an image preview.
+  It displays posts in a single-column, article-style format for better readability.
 -->
 <div class="bg-gray-50 min-h-screen">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-10 text-center">Latest Posts</h1>
+        <header class="text-center mb-16">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800">Latest Posts</h1>
+            <p class="mt-4 text-lg text-gray-500">Welcome to our corner of the internet.</p>
+        </header>
         
-        <!-- Responsive Grid for Blog Posts -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Blog Posts Container -->
+        <div class="max-w-3xl mx-auto space-y-12">
             
             <!-- 
               The loop below iterates through all available posts.
-              For each post, it creates a card with an image, date, title, excerpt, and a "Read More" link.
+              For each post, it creates a card with content first, followed by the image.
             -->
             {% for post in site.posts %}
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-all duration-300 ease-in-out">
-                    
-                    <!-- 
-                      Post Image Section
-                      This checks if a post has an 'image' variable in its front matter.
-                      If it does, it creates a clickable image link to the post.
-                    -->
-                    {% if post.image %}
-                        <a href="{{ post.url | relative_url }}">
-                            <img src="{{ post.image }}" alt="{{ post.title }}" class="w-full h-56 object-cover group-hover:opacity-90 transition-opacity duration-300" onerror="this.onerror=null;this.src='https://placehold.co/600x400/e2e8f0/94a3b8?text=Image+Not+Found';">
-                        </a>
-                    {% endif %}
+                <article class="bg-white rounded-xl border border-gray-200 overflow-hidden group transition-all duration-300 ease-in-out hover:shadow-xl hover:border-cyan-300">
                     
                     <!-- Post Content Section -->
-                    <div class="p-6">
-                        <p class="text-gray-500 text-sm mb-2">
+                    <div class="p-6 sm:p-8">
+                        <p class="text-gray-500 text-sm mb-3">
                             {{ post.date | date: "%B %d, %Y" }}
                         </p>
-                        <h2 class="text-2xl font-bold mb-3 text-gray-900 leading-tight">
+                        <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-gray-900 leading-tight">
                             <a href="{{ post.url | relative_url }}" class="hover:text-cyan-600 transition-colors duration-300">{{ post.title }}</a>
                         </h2>
-                        <p class="text-gray-700 mb-4 h-24 overflow-hidden">
+                        <p class="text-gray-600 mb-6">
                             <!-- 
-                              The excerpt is stripped of HTML and truncated to 25 words 
-                              to keep the card layout consistent.
+                              The excerpt is stripped of HTML and truncated to 35 words.
                             -->
-                            {{ post.excerpt | strip_html | truncatewords: 25 }}
+                            {{ post.excerpt | strip_html | truncatewords: 35 }}
                         </p>
-                        <a href="{{ post.url | relative_url }}" class="text-cyan-500 hover:text-cyan-700 font-bold tracking-wide transition-colors duration-300">
+                        <a href="{{ post.url | relative_url }}" class="text-cyan-500 hover:text-cyan-700 font-bold tracking-wide transition-colors duration-300 group-hover:text-cyan-600">
                             Read More &rarr;
                         </a>
                     </div>
-                </div>
+
+                    <!-- 
+                      Post Image Section (Moved Below Content)
+                      This checks if a post has an 'image' variable in its front matter.
+                      If it does, it displays the image at the bottom of the card.
+                    -->
+                    {% if post.image %}
+                        <a href="{{ post.url | relative_url }}" class="block">
+                            <img src="{{ post.image }}" alt="{{ post.title }}" class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.onerror=null;this.src='https://placehold.co/800x400/e2e8f0/94a3b8?text=Image+Not+Found';">
+                        </a>
+                    {% endif %}
+
+                </article>
             {% endfor %}
             
         </div>
