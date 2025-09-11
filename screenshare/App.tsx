@@ -1,8 +1,8 @@
 import React, { useState, useRef, useCallback } from 'react';
-import Controls from './components/Controls';
-import DesktopView from './components/DesktopView';
-import Welcome from './components/Welcome';
-import Viewer from './components/Viewer';
+import Controls from './components/Controls.tsx';
+import DesktopView from './components/DesktopView.tsx';
+import Welcome from './components/Welcome.tsx';
+import Viewer from './components/Viewer.tsx';
 
 // PeerJS is loaded from a script tag in index.html, so we declare it here.
 declare const Peer: any;
