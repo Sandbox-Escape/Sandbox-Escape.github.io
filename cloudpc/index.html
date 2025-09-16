@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cloud PC Shop</title>
+  <style>
+    body { font-family: sans-serif; display: flex; gap: 20px; padding: 20px; }
+    .product-card { border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 300px; text-align: center; }
+    .product-card img { max-width: 100px; height: auto; }
+    .product-card a { display: inline-block; background-color: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 10px;}
+  </style>
+</head>
+<body>
+
+  <h1>Welcome to our Cloud PC Shop!</h1>
+
+  {% for product in site.products %}
+    <div class="product-card">
+      <img src="{{ product.thumbnail }}" alt="{{ product.name }}">
+      <h2>{{ product.name }}</h2>
+      <p><strong>Specs:</strong> {{ product.specifications }}</p>
+      <a href="{{ product.form }}" target="_blank">Sign Up Now</a>
+    </div>
+  {% endfor %}
+
+</body>
+</html>
