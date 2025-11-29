@@ -1,330 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<style>
-     .banner{
-         background-colour: red;
-     }
-<style>   
+    <div style="background-color: rgb(180, 210, 255); padding: 10px; text-align: center; border-radius: 10px;">
+        <button style="background-color: rgb(128, 151, 206);">Home</button>
+        <button onclick="window.location.href='latest/index.html'">Latest</button>
+        <button onclick="window.location.href='join/index.html'">Join</button>
+        <button onclick="window.location.href='docs/index.html'">Docs</button>
+    </div>
     
-<p class="banner">
-    site in progress, come back later!
-</p>
-    
-    
-    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sandbox Escape Official</title>
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAACMs/FzAAAAQlBMVEX////y8vL19fX5+fn8/Pz39/f6+vrz8/P////u7u7w8PDt7e3y8vL////w8PD////x8fH////x8fH29vb////x8fH///+Fj/etAAABsklEQVR4nO3b246bMBiA0cgJgYSAQO7/Pms3M6kHnaSj2fP7LgG5B/VqjYSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOC3u+yHl+Tj8Yg8Lp/uT5Pj8Yg8Pj+f7k+T4/GIPD4/n+5Pk+PxiDw+P5/uT5Pj8Yg8Pj+f7k+T4/GIPD4/n+5Pk+PxiDw+P5/uT5Pj8Yg8Pj+f7k+T4/Fk3h8n0+PxfH4+3Z8mx+PxfH4+3Z8mx+PxfH4+3Z8mx+PxfH4+3Z8mx+PxfH4+3Z8mx+PxfH4+3Z8mx+PxfH4+3Z8mx+PxfH4+3Z8mRyP5vD9Pjsfz+fl0f5ocj+fz8+n+NDkez+fn0/1pciy+P02Ox/P5+XR/mhyP5/Pz6f40OR7P5+fT/WlyPJ7Pz6f70+R4PJ+fT/enSXB4fp4cj+fz8+n+NDkez+fn0/1pchy+P02Ox/P5+XR/mhyP5/Pz6f40OR7P5+fT/WlyPJ7Pz6f70+R4PJ+fT/enSXB4fp4cj+fz8+n+NDkez+fn0/1pchy+P02Ox/P5+XR/mhyP5/Pz6f40OR7P5+fT/WlyPJ7Pz6f70+R4PJ+fT/enSXB4fp4AAAAAAAAAAAAAAAAAAAAAAAAAAAAA+A/d62L+AIlqgAAAAABJRU5ErkJggg==">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Define the keyframes for the animated gradient */
-        @keyframes animated-gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        h1 {
+            text-align: center;
+            font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
         }
 
-        /* --- Custom Cursor --- */
-        html {
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.1)" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'), auto;
-        }
-        a, button {
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="rgba(0, 255, 255, 0.2)" stroke="cyan" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'), pointer;
+        h2 {
+            text-align: center;
+            font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(45deg, #1f2937, #374151, #111827, #374151, #1f2937);
-            background-size: 400% 400%;
-            animation: animated-gradient 20s ease infinite;
-            padding-top: 5rem; /* Height of the navbar */
+        button {
+            margin: 5px;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background-color: rgb(160, 182, 234);
+            cursor: pointer;
+            transition-duration: 0.2s;
         }
 
-        /* Glassmorphism card effect */
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
+        button:hover {
+            background-color: rgb(128, 151, 206);
         }
-        .card:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #111827; }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
-        
-        /* Gradient background for Join modal */
-        #join-modal-content {
-            background: linear-gradient(135deg, rgba(31, 41, 55, 0.8), rgba(17, 24, 39, 0.9));
-        }
-   
-    <iframe width="110" height="200" src="https://www.myinstants.com/instant/galaxy-meme-18643/embed/" frameborder="0" scrolling="no"></iframe>
     </style>
-</head>
-<body class="text-white antialiased">
-
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/30 backdrop-blur-lg border-b border-gray-700/50">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <div class="flex-shrink-0">
-                        <span class="text-2xl font-bold text-white">Sandbox-Escape</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <button id="my-se-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">My SE</button>
-                    <a href="https://sandbox-escape.github.io/blog" target="_blank" rel="noopener noreferrer" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">Blog</a>
-                    <button id="credits-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">Credits</button>
-                    <button id="join-btn" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">Join</button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
-        <header class="text-center mb-12">
-            <img id="avatar" src="https://placehold.co/128x128/1a202c/ffffff?text=Org" alt="GitHub Avatar" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full mx-auto mb-4 border-4 border-gray-600 shadow-lg">
-            <h1 id="name" class="text-3xl sm:text-4xl font-bold text-gray-100">Organization Name</h1>
-            <p id="bio" class="text-md sm:text-lg text-gray-400 mt-2 max-w-2xl mx-auto">Organization description will appear here.</p>
-        </header>
-
-        <main>
-            <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 text-gray-200">Our Repositories</h2>
-            <div id="repos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="text-center p-8 col-span-full"><p class="text-gray-400">Loading repositories...</p></div>
-            </div>
-        </main>
-
-        <footer class="text-center mt-12 text-gray-500">
-            <p>Powered by the GitHub API</p>
-            <p>&copy; <span id="year"></span> <span id="footer-name">Organization Name</span>. All rights reserved.</p>
-        </footer>
-    </div>
     
-    <div id="credits-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="card w-full max-w-4xl max-h-[80vh] flex flex-col rounded-xl p-6 relative">
-            <button class="close-modal-btn absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h2 class="text-2xl font-bold text-center mb-6 text-white flex-shrink-0">Credits</h2>
-            <div id="members-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto p-2">
-                <p class="col-span-full text-center text-gray-400">Loading members...</p>
-            </div>
-        </div>
+    <h1>Welcome</h1>
+
+    <h2>We are Sandbox Escape, a development team dedicated to bringing *useful* software.</h2>
+
+    <h1>We develop for:</h1>
+
+    <ul style="text-align: center; font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; font-weight: bold;">
+        <li>iOS</li>
+        <li>Android</li>
+        <li>macOS</li>
+        <li>Web</li>
+        <li>Windows</li>
+        <li>GNU/Linux</li>
+    </ul>
+
+    <h1>We need help:</h1>
+
+    <div style="text-align: center;">
+
+    <img src="atlasos.png" alt="AtlasOS" style="border-radius: 15px;" width="400px" height="400px">
+
     </div>
 
-    <div id="join-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div id="join-modal-content" class="card w-full max-w-2xl h-[80vh] flex flex-col rounded-xl p-2 sm:p-4 relative">
-            <button class="close-modal-btn absolute top-4 right-4 text-gray-200 hover:text-white transition-colors z-10">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <iframe class="w-full h-full border-0 rounded-lg" src="https://docs.google.com/forms/d/e/1FAIpQLSdQaUx6Kh371zJ-pJD7gVMSqKSO9WYVspqPBe4OBsjK_CV5RA/viewform?embedded=true" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-        </div>
-    </div>
-
-    <div id="my-se-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="card w-full max-w-2xl max-h-[80vh] flex flex-col rounded-xl p-6 relative">
-             <button class="close-modal-btn absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h2 class="text-2xl font-bold text-center mb-6 text-white flex-shrink-0">My Contributions</h2>
-            <form id="contribution-form" class="flex flex-col sm:flex-row gap-2 mb-4">
-                <input type="text" id="github-username-input" placeholder="Enter your GitHub username" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">Search</button>
-            </form>
-            <div id="contributions-container" class="overflow-y-auto p-2 space-y-3">
-                <p class="text-center text-gray-400">Enter your username to see your contributions.</p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // --- CONFIGURATION ---
-        const GITHUB_ORG_NAME = 'Sandbox-Escape'; 
-
-        // --- DOM Elements ---
-        const nameEl = document.getElementById('name');
-        const bioEl = document.getElementById('bio');
-        const avatarEl = document.getElementById('avatar');
-        const yearEl = document.getElementById('year');
-        const footerNameEl = document.getElementById('footer-name');
-        const reposContainerEl = document.getElementById('repos-container');
-        
-        const creditsBtn = document.getElementById('credits-btn');
-        const joinBtn = document.getElementById('join-btn');
-        const mySeBtn = document.getElementById('my-se-btn');
-        
-        const creditsModal = document.getElementById('credits-modal');
-        const joinModal = document.getElementById('join-modal');
-        const mySeModal = document.getElementById('my-se-modal');
-        
-        const membersContainer = document.getElementById('members-container');
-        const contributionForm = document.getElementById('contribution-form');
-        const contributionsContainer = document.getElementById('contributions-container');
-        const usernameInput = document.getElementById('github-username-input');
-
-        // --- API URLs ---
-        const ORG_API_URL = `https://api.github.com/orgs/${GITHUB_ORG_NAME}`;
-        const REPOS_API_URL = `https://api.github.com/orgs/${GITHUB_ORG_NAME}/repos?sort=updated&per_page=100`;
-        const MEMBERS_API_URL = `https://api.github.com/orgs/${GITHUB_ORG_NAME}/public_members`;
-        const userEventsUrl = (username) => `https://api.github.com/users/${username}/events/public`;
-
-        // --- Functions ---
-        async function fetchOrgProfile() {
-            try {
-                const response = await fetch(ORG_API_URL);
-                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                const org = await response.json();
-                avatarEl.src = org.avatar_url || 'https://placehold.co/128x128/1a202c/ffffff?text=Org';
-                nameEl.textContent = org.name || org.login;
-                bioEl.textContent = org.description || 'An awesome organization on GitHub.';
-                footerNameEl.textContent = org.name || org.login;
-            } catch (error) {
-                console.error('Error fetching organization profile:', error);
-                nameEl.textContent = 'Error';
-                bioEl.textContent = 'Could not fetch organization profile data.';
-            }
-        }
-
-        async function fetchOrgRepos() {
-            try {
-                const response = await fetch(REPOS_API_URL);
-                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                const repos = await response.json();
-                reposContainerEl.innerHTML = '';
-                if (repos.length === 0) {
-                    reposContainerEl.innerHTML = '<p class="text-center col-span-full text-gray-400">No public repositories found.</p>';
-                    return;
-                }
-                repos.forEach(repo => {
-                    if (repo.fork) return;
-                    const repoCard = `
-                        <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="card rounded-lg p-6 flex flex-col justify-between shadow-lg hover:shadow-cyan-500/50">
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-100 mb-2">${repo.name}</h3>
-                                <p class="text-gray-400 text-sm mb-4">${repo.description || 'No description provided.'}</p>
-                            </div>
-                            <div class="flex justify-between items-center mt-4 text-sm text-gray-300">
-                                <span>${repo.language || 'N/A'}</span>
-                                <span>⭐ ${repo.stargazers_count}</span>
-                            </div>
-                        </a>`;
-                    reposContainerEl.innerHTML += repoCard;
-                });
-            } catch (error) {
-                console.error('Error fetching repositories:', error);
-                reposContainerEl.innerHTML = '<p class="text-center col-span-full text-red-400">Could not fetch repositories.</p>';
-            }
-        }
-
-        async function fetchOrgMembers() {
-            membersContainer.innerHTML = '<p class="col-span-full text-center text-gray-400">Loading members...</p>';
-            try {
-                const response = await fetch(MEMBERS_API_URL);
-                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                const members = await response.json();
-                membersContainer.innerHTML = '';
-                if (members.length === 0) {
-                    membersContainer.innerHTML = '<p class="col-span-full text-center text-gray-400">No public members found.</p>';
-                    return;
-                }
-                members.forEach(member => {
-                    const memberCard = `
-                        <a href="${member.html_url}" target="_blank" rel="noopener noreferrer" class="bg-gray-800/50 p-4 rounded-lg text-center hover:bg-gray-700/70 transition-colors flex flex-col items-center gap-2">
-                            <img src="${member.avatar_url}" alt="${member.login}" class="w-16 h-16 rounded-full border-2 border-gray-600">
-                            <p class="font-bold text-md text-white">${member.login}</p>
-                        </a>`;
-                    membersContainer.innerHTML += memberCard;
-                });
-            } catch (error) {
-                console.error('Error fetching organization members:', error);
-                membersContainer.innerHTML = '<p class="col-span-full text-center text-red-400">Could not fetch members.</p>';
-            }
-        }
-
-        async function fetchUserContributions(username) {
-            if (!username) {
-                contributionsContainer.innerHTML = '<p class="text-center text-yellow-400">Please enter a username.</p>';
-                return;
-            }
-            contributionsContainer.innerHTML = '<p class="text-center text-gray-400">Searching for contributions...</p>';
-            try {
-                const response = await fetch(userEventsUrl(username));
-                if (!response.ok) throw new Error(`Could not find user or fetch events: ${response.statusText}`);
-                const events = await response.json();
-
-                const orgEvents = events.filter(event => event.repo.name.startsWith(`${GITHUB_ORG_NAME}/`));
-                
-                if (orgEvents.length === 0) {
-                    contributionsContainer.innerHTML = `<p class="text-center text-gray-400">No public contributions found for ${username} in this organization.</p>`;
-                    return;
-                }
-                
-                contributionsContainer.innerHTML = ''; // Clear previous results
-                orgEvents.forEach(event => {
-                    let eventHtml = '';
-                    const repoName = event.repo.name.split('/')[1];
-                    const eventDate = new Date(event.created_at).toLocaleDateString();
-
-                    if (event.type === 'PushEvent') {
-                        eventHtml = `<div class="bg-gray-800/50 p-3 rounded-lg">Pushed ${event.payload.size} commit(s) to <a href="https://github.com/${event.repo.name}" target="_blank" class="font-bold text-cyan-400">${repoName}</a> on ${eventDate}</div>`;
-                    } else if (event.type === 'PullRequestEvent') {
-                        eventHtml = `<div class="bg-gray-800/50 p-3 rounded-lg">${event.payload.action.charAt(0).toUpperCase() + event.payload.action.slice(1)} a pull request in <a href="${event.payload.pull_request.html_url}" target="_blank" class="font-bold text-cyan-400">${repoName}</a> on ${eventDate}</div>`;
-                    } else if (event.type === 'IssuesEvent') {
-                        eventHtml = `<div class="bg-gray-800/50 p-3 rounded-lg">${event.payload.action.charAt(0).toUpperCase() + event.payload.action.slice(1)} an issue in <a href="${event.payload.issue.html_url}" target="_blank" class="font-bold text-cyan-400">${repoName}</a> on ${eventDate}</div>`;
-                    }
-                    contributionsContainer.innerHTML += eventHtml;
-                });
-
-            } catch (error) {
-                console.error('Error fetching user contributions:', error);
-                contributionsContainer.innerHTML = `<p class="text-center text-red-400">Could not fetch contributions for ${username}.</p>`;
-            }
-        }
-
-        // --- Initialization and Event Listeners ---
-        function init() {
-            yearEl.textContent = new Date().getFullYear();
-            fetchOrgProfile();
-            fetchOrgRepos();
-
-            // Modal toggling logic
-            const setupModal = (btn, modal) => {
-                btn.addEventListener('click', () => modal.classList.remove('hidden'));
-                modal.querySelector('.close-modal-btn').addEventListener('click', () => modal.classList.add('hidden'));
-                modal.addEventListener('click', (event) => {
-                    if (event.target === modal) modal.classList.add('hidden');
-                });
-            };
-            
-            setupModal(joinBtn, joinModal);
-            setupModal(mySeBtn, mySeModal);
-            
-            creditsBtn.addEventListener('click', () => {
-                creditsModal.classList.remove('hidden');
-                if (membersContainer.childElementCount <= 1) { 
-                     fetchOrgMembers();
-                }
-            });
-            creditsModal.querySelector('.close-modal-btn').addEventListener('click', () => creditsModal.classList.add('hidden'));
-            creditsModal.addEventListener('click', (event) => {
-                if (event.target === creditsModal) creditsModal.classList.add('hidden');
-            });
-
-            // Contribution form submission
-            contributionForm.addEventListener('submit', (event) => {
-                event.preventDefault();
-                fetchUserContributions(usernameInput.value.trim());
-            });
-        }
-
-        init();
-    </script>
-</body>
-</html>
+    <h2>We are making an OS and need contributors. Please go to the contibution page and register!</h2>

@@ -1,7 +1,0 @@
-{
-  "name": "Sandbox Escape Screenshare Service",
-  "description": "A simple peer-to-peer screen sharing application using a share code. No servers, no sign-ups.",
-  "requestFramePermissions": [
-    "display-capture"
-  ]
-}
