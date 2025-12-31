@@ -1,0 +1,11 @@
+img {
+    border-radius: 15px;
+}
+
+body {
+    font-family: monospace;
+    background-color: #f8f4e3;
+    color: #5b4636;
+    text-align: center;
+    padding: 20px;
+}
